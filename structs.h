@@ -1,3 +1,6 @@
+#ifndef STRUCTS
+#define STRUCTS
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +22,9 @@ typedef struct {
     int tipo;
     char aviso[50];
 } avisos;
+
+
+#endif
 
 typedef struct {
     int nlinhas, ncolunas;
