@@ -1,6 +1,5 @@
-#ifndef CLIENT
-#define CLIENT
+//Header do cliente
 
+void criar_editor();
 
-
-#endif
+int main();
