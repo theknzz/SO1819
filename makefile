@@ -1,13 +1,8 @@
-all: server clean
+server: server.o funcoes.o
+	gcc server.o funcoes.o -o server
 
-servidor: servidor.o funcoes.o
-	gcc servidor.o funcoes.o -o servidor
-
-servidor.o: servidor.c
-	gcc servidor.c -c
+server.o: server.c server-defaults.h structs.h
+	gcc server.c -c
 
 funcoes.o: funcoes.c
 	gcc funcoes.c -c
-
-clean: servidor
-	rm *.o servidor
