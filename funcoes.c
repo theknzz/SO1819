@@ -34,7 +34,7 @@
 		fclose(f);
 	}
 
-// Recebe opcão do server
+// Recebe opcão do server [ERRO]
 
 	void getOption(int argc, char *argv) {
 
