@@ -1,5 +1,5 @@
-#include "server-defaults.h"
-#include "client-defaults.h"
+#include "server.h"
+#include "client.h"
 #include "structs.h"
 
 // Inicialização das env vars
@@ -34,7 +34,19 @@
 		fclose(f);
 	}
 
+// Recebe opcão do server
 
+	void getOption(int argc, char *argv) {
+
+		if(strcmp(argv[1],"-s") == 0)
+			printf("\n\nSettings:");
+		
+		if(argc == 2 && strcmp("-l",argv[1]) == 0) {
+			printf("Fich: %s", argv[2]);
+			printf("\n\nSettings:");
+		}
+
+	}
 
 /* server menu */
 
