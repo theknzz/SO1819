@@ -1,17 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "server.h"
 #include "structs.h"
+
 
 int main( int argc, char *argv) {
 
 	inicia_vars();
-	user ut;
-	fich fx;
 
-	/* if (argc == 1)
-			menu();
-	else */
+	if(argc != 2)
+	{
+		menu();
+	} else {
 		getOption(argc,argv);
-	
+	}
 
 	/* printf("Insira um nome: ");
 	scanf(" %7[^\n]", ut.nome);

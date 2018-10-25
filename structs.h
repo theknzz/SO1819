@@ -9,8 +9,8 @@
 #include <pthread.h>
 
 typedef struct {
-    int n_utilizadores, n_palavras, n_letras;
-    char fich_utilizadores[15];
+    int n_utilizadores, n_utilizadores_max, n_palavras, n_letras, n_named_pipes, fich_utilizadores;
+    char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
 } server;
 
 typedef struct {
@@ -23,14 +23,9 @@ typedef struct {
     char aviso[50];
 } avisos;
 
-
-#endif
-
 typedef struct {
     int nlinhas, ncolunas;
-    int posx, posy;
+    int l_atual, c_atual;
 } editor;
 
-typedef struct {
-    char nome[10];
-} fich;
+#endif
