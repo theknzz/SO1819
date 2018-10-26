@@ -1,25 +1,23 @@
 #include "server.h"
 #include "structs.h"
 
-int main( int argc, char *argv) {
+int main( int argc, char **argv) {
+	editor t;
+	user u;
+	server s;
 
-	inicia_vars();
-	user ut;
-	fich fx;
-
-	/* if (argc == 1)
-			menu();
-	else */
-		getOption(argc,argv);
+	s.fich_nome[10] = "medit.db";
 	
 
-	/* printf("Insira um nome: ");
-	scanf(" %7[^\n]", ut.nome);
+	char fich[10];
+	inicia_vars(&t,&u,&s);
+	getOption(argc, argv, t, u, s);
+	
 
-	printf("Insira um fich: ");
-	scanf(" %9[^\n]", fx.nome);
+	printf("Insira um nome: ");
+	scanf(" %7[^\n]", u.nome);
 
-	verifica_user(ut.nome,fx.nome); */
+	verifica_user(u.nome,s.fich_nome);
 
 	return 0;
 }

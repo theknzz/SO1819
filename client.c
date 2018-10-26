@@ -1,10 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
 #include "structs.h"
 #include "client.h"
+#include "server.h"
 
 void criar_editor(){
     int tecla;
@@ -83,7 +79,8 @@ void criar_editor(){
 	exit(0);
 }*/
 
-int main(){
+int main(int argc, char**argv){
+    getUser(argc, &argv);
 	criar_editor();
 
     return 0;

@@ -7,23 +7,26 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <unistd.h>
+#include <ctype.h>
+#include <getopt.h>
 
-typedef struct {
+typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_palavras, n_letras, n_named_pipes, fich_utilizadores;
     char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
 } server;
 
-typedef struct {
+typedef struct User {
     char nome[8];
     int tempo_linha, linhas_editadas, linha_atual;
 } user;
 
-typedef struct {
+typedef struct Avisos {
     int tipo;
     char aviso[50];
 } avisos;
 
-typedef struct {
+typedef struct Editor {
     int nlinhas, ncolunas;
     int l_atual, c_atual;
 } editor;

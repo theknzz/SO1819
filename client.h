@@ -2,7 +2,6 @@
 #define CLIENT
 
 void criar_editor();
-
-int main();
+void getUser(int argc, char ** argv);
 
 #endif
