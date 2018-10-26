@@ -7,16 +7,19 @@
 
 void inicia_vars(editor *t, user *u, server *s)
 {
+		// Se as variaveis ambiente não existirem são iniciadas com os valores predefinidos no enunciado
+		// caso existão o valor delas é passado a inteiro pela funcao 'atoi()' e depois passado à estrutura
+
 		// editor
 
-		if (getenv("MEDIT_MAXLINES") != NULL)
+		if (getenv("MEDIT_MAXLINES") != NULL) 
 		{
 			t->nlinhas = atoi(getenv("MEDIT_MAXLINES"));
 		}
 
 		else
 		{
-			t->nlinhas = 15;
+			t->nlinhas = 15; 
 		}
 
 		if (getenv("MEDIT_MAXCOLUMNS") != NULL)
@@ -54,39 +57,46 @@ void inicia_vars(editor *t, user *u, server *s)
 		if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != 3) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != 10)
 		{
 			printf("\nErro na inicialização das variáveis ambiente\n");
-	}
+		}
 } 
 
-// compara cada nome do ficheiro recebido com "nome"
+// Procura 'nome' recebido por parametro na base de dados recebida por parametro
 
-	void verifica_user( char *nome, char *file ) {
-
-		FILE  *f = fopen(file,"r");
-
+	int verifica_user( char *nome, char *file ) {
+		
 		char user[8];
-
+		
+		FILE  *f = fopen(file,"r");
 		if(f == NULL)
-			printf("\nErro ao abrir o ficheiro");
-
-		while(fscanf( f, " %s\n", user) == 1) {
-			if(strcmp(user, nome) == 0){
-				printf("\nUtilizador [%s] encontrado !\n", nome);
-				fclose(f);
-				return;
-			}
+		{
+			printf("\nErro ao abrir o ficheiro '%s'\n", file); // se a base de dados recebida nao existir ou houver algum problema na sua abertura
+			return 0;
 		}
-		printf("\nUtilizador [%s] não encontrado...\n", nome);
+
+			while(fscanf(f," %[^\n]", user) == 1)  // enquanto for possível ler nomes
+			{				
+				if(strcmp(user, nome) == 0)   // os nomes são comparados
+				{
+					printf("\nUtilizador '%s' encontrado !\n", nome);  // se forem iguais
+					fclose(f);
+					return 1;
+				}
+			}
+		
+		printf("\nUtilizador '%s' não encontrado...\n", nome); // se nao forem
 		fclose(f);
+		return 0;
 	}
 
 // Mostra defenicoes
 
 		void mostra_def(editor t, server s)
 		{
+			printf("\n\n\n");
 			printf("Número de linhas: %d\n", t.nlinhas);
 			printf("Número de colunas: %d\n", t.ncolunas);
 			printf("Nome da base de dados: %s\n", s.fich_nome);
-			printf("Número de named pipes a utilizar: \n"/*s.n_named_pipes*/);
+			printf("Número de named pipes a utilizar: \n");
 			printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
 		}
 
@@ -98,7 +108,7 @@ void inicia_vars(editor *t, user *u, server *s)
 		int c;
 
 		while(1) {
-
+			// comandos 
 			static struct option long_options[] = {
 				{"definicoes", no_argument, 0, 'd'},
 				{"carregar", required_argument, 0, 'c'},
@@ -112,24 +122,28 @@ void inicia_vars(editor *t, user *u, server *s)
 				{0, 0, 0, 0}
 			};
 
-			int option_index = 0;
+			int option_index = 0; 
 
 			c = getopt_long (argc,argv,"dc:g:l:eutsh",long_options,&option_index);
 
-			if(c == -1)
+			if(c == -1)   // se o getopt não receber nenhum comando
 			{
 				break;
 			}
+
+			// se receber, compara o comando recebido
+			// quer pela long form ou pela short form
+			// Exemplo: -d / --definicoes
+
 			switch(c)
 			{
 				case 0:
 					if(long_options[option_index].flag != 0)
+						printf ("Opcao %s", long_options[option_index].name);
+					if (optarg)
+						printf(" com o argumento %s", optarg);
+					printf("\n");
 					break;
-				printf ("Opcao %s", long_options[option_index].name);
-				if (optarg)
-					printf(" com o argumento %s", optarg);
-				printf("\n");
-				break;
 
 				case 'd':
 					mostra_def(t,s);
@@ -164,60 +178,60 @@ void inicia_vars(editor *t, user *u, server *s)
 					break;
 				
 				case 'h':
-
 					printf("\n  COMANDOS:\n\n");
-					printf("\t  '-d'           \tou\tdefinicoes             \t\tParametros de funcionamento atuais do servidor.\n");
-					printf("\t  '-c <ficheiro>'\tou\tcarregar <ficheiro>    \t\tCarrega dentro dos parametros definidos pelo admin.\n");
-					printf("\t  '-g <ficheiro>'\tou\tguardar <ficheiro>     \t\tGuarda o ficheiro\n");
-					printf("\t  '-l <nr_linha>'\tou\tlibertar <nr_linha>    \t\tDescarta eventuais alteracoes entretato introduzidas.\n");
-					printf("\t  '-e'           \tou\testatisticas			\t\t(...)\n");
-					printf("\t  '-u'           \tou\tutilizadores           \t\tMostra todos os utilizadores presentes ordenados por idade de sessao\n");
-					printf("\t  '-t'           \tou\ttexto                  \t\tMostar o texto\n");
-					printf("\t  '-s'           \tou\tsair                   \t\tTermina a edição em curso emediatamente.\n");
+					printf("'-d'        \tou\tdefinicoes        \tParametros de funcionamento atuais do servidor.\n");
+					printf("'-c <fich>' \tou\tcarregar <fich>   \tCarrega dentro dos parametros definidos pelo admin.\n");
+					printf("'-g <fich>' \tou\tguardar <fich>    \tGuarda o ficheiro\n");
+					printf("'-l <linha>'\tou\tlibertar <linha>  \tDescarta eventuais alteracoes entretato introduzidas.\n");
+					printf("'-e'        \tou\testatisticas		\tMostra as estatisticas segundo a segundo.\n");
+					printf("'-u'        \tou\tutilizadores      \tMostra todos os utilizadores presentes ordenados por idade de sessao\n");
+					printf("'-t'        \tou\ttexto             \tMostar o texto\n");
+					printf("'-s'        \tou\tsair              \tTermina a edição em curso emediatamente.\n");
 					break;
 
 				case '?':
-
-					printf("\n  COMANDOS:\n\n");
-					printf("\t  '-d'           \tou\tdefinicoes             \t\tParametros de funcionamento atuais do servidor.\n");
-					printf("\t  '-c <ficheiro>'\tou\tcarregar <ficheiro>    \t\tCarrega dentro dos parametros definidos pelo admin.\n");
-					printf("\t  '-g <ficheiro>'\tou\tguardar <ficheiro>     \t\tGuarda o ficheiro\n");
-					printf("\t  '-l <nr_linha>'\tou\tlibertar <nr_linha>    \t\tDescarta eventuais alteracoes entretato introduzidas.\n");
-					printf("\t  '-e'           \tou\testatisticas			\t\t(...)\n");
-					printf("\t  '-u'           \tou\tutilizadores           \t\tMostra todos os utilizadores presentes ordenados por idade de sessao\n");
-					printf("\t  '-t'           \tou\ttexto                  \t\tMostar o texto\n");
-					printf("\t  '-s'           \tou\tsair                   \t\tTermina a edição em curso emediatamente.\n");
+					printf("\nConsulte -help para listar todos os comandos possiveis.");
 					break;
 
 				default:
 					abort();
 			}
 
+			// mostra os argumentos dos comandos que estão a ser inseridos com + do que um argumento 
+
 			if (optind < argc)
 				{
-					printf("[ERRO] %s",argv[optind++]);
+					printf("[ERRO] Argumento '%s' foi inserido a mais.",argv[optind++]);
 					putchar('\n');
 				}
+			
 			exit(0);
 		}
 	}
 
-	void getUser(int argc, char ** argv,server s)
+
+/* 	void getUser(int argc, char **argv, server s)
 	{
 		int opt;
+		char fich[10];
 
-		while ((opt = getopt(argc,argv, "u:")) != -1)
+		strcpy(fich,"medit.db");
+
+		while ((opt = getopt(argc, argv, "u:")) != -1)
 		{
 			switch(opt)
 			{
 				case 'u':
-					verifica_user(optarg,s.fich_nome);
+					printf("\nNome do base de dados: ");
+					scanf(" %9[^\n]", fich);
+					verifica_user(optarg,fich);
 					break;
-				
 				case '?':
 					puts("flag");
 					break;
-
 			}
-		}
+		} 
+
+		exit(0);
 	}
+	*/
