@@ -4,7 +4,7 @@
 
 void criar_editor()
 {
-    int tecla;
+    int tecla, i;
     editor t;
     char tab[t.nlinhas][t.ncolunas];
     WINDOW *janela;  // ponteiro para uma janela(como se fosse para um ficheiro)
@@ -14,12 +14,27 @@ void criar_editor()
     noecho();   // não permite que se vejam teclas no ecrã
     cbreak();   // caso haja um ^C acaba o programa
 
-    janela = newwin(17, 47, 2, 2); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
+    janela = newwin(17, 48, 2, 3); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
 
     box(janela, ACS_VLINE, ACS_HLINE);  //Criação do border (WINDOW, tipo de border, tipo de border)
 
     scrollok(janela, TRUE); // Não permite as cenas passarem para fora da janela (WINDOW, TRUE ou FALSE)
     keypad(janela, TRUE);  // Permite ler as letras do teclado (FALSE por default)
+
+    init_pair(1, COLOR_RED, COLOR_WHITE);
+    init_pair(2, COLOR_BLACK, COLOR_RED);
+    wbkgd(janela, COLOR_PAIR(1));
+
+    /*t.l_atual = 1;
+    t.c_atual = 0;
+    wrefresh(janela);
+
+    for(i=0; i < t.nlinhas; ++i)
+    {
+        wmove(janela, t.l_atual, t.c_atual);
+        wprintw(janela, "%d_", i);
+        t.l_atual++;
+    }*/
 
     t.l_atual = 1;
     t.c_atual = 1;
@@ -44,12 +59,12 @@ void criar_editor()
             wmove(janela, t.l_atual + 1, t.c_atual);
             break;
         case KEY_RIGHT:
-            if (t.c_atual == 45)
+            if (t.c_atual == 46)
                 break;
             wmove(janela, t.l_atual, t.c_atual + 1);
             break;
         case KEY_LEFT:
-            if (t.c_atual == 1)
+            if (t.c_atual == 2)
                 break;
             wmove(janela, t.l_atual, t.c_atual - 1);
             break;
@@ -58,30 +73,38 @@ void criar_editor()
             wrefresh(janela);
             while (1)
             {
+                attron(COLOR_PAIR(2));
                 tecla = wgetch(janela);
                 getyx(janela, t.l_atual, t.c_atual);
                 switch (tecla)
                 {
                 case KEY_RIGHT:
-                    if (t.c_atual == 45)
+                    if (t.c_atual == 46)
                         break;
                     wmove(janela, t.l_atual, t.c_atual + 1);
                     break;
                 case KEY_LEFT:
-                    if (t.c_atual == 1)
+                    if (t.c_atual == 2)
                         break;
                     wmove(janela, t.l_atual, t.c_atual - 1);
                     break;
-
                 }
                 if (tecla == 27) //No caso de ESC
-                    {
-                        //descarta_info();
-                        noecho();
-                        break;
-                    }
+                {
+                    //descarta_info();
+                    noecho();
+                    attroff(COLOR_PAIR(2));
+                    break;
+                }
+                if(tecla = 10)
+                {
+                    //guarda_info();
+                    noecho();
+                    attroff(COLOR_PAIR(2));
+                    break;
+                }
             }
-            tecla = 0;
+            tecla = wgetch(janela);
             break;
         }
         if (tecla == 27)
