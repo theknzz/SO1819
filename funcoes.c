@@ -19,7 +19,7 @@ void inicia_vars(editor *t, user *u, server *s)
 
 		else
 		{
-			t->nlinhas = 15; 
+			t->nlinhas = MAXLINES; 
 		}
 
 		if (getenv("MEDIT_MAXCOLUMNS") != NULL)
@@ -29,7 +29,7 @@ void inicia_vars(editor *t, user *u, server *s)
 
 		else
 		{
-			t->ncolunas = 45;
+			t->ncolunas = MAXCOLUMNS;
 		}
 
 		// user
@@ -40,7 +40,7 @@ void inicia_vars(editor *t, user *u, server *s)
 		}
 
 		else
-			u->tempo_linha = 10;
+			u->tempo_linha = TIME_OUT;
 
 		// server
 
@@ -50,11 +50,11 @@ void inicia_vars(editor *t, user *u, server *s)
 		}
 
 		else
-			s->n_utilizadores_max = 3;
+			s->n_utilizadores_max = MAXUSERS;
 
 		// validacao
 
-		if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != 3) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != 10)
+		if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != TIME_OUT)
 		{
 			printf("\nErro na inicialização das variáveis ambiente\n");
 		}
@@ -62,7 +62,7 @@ void inicia_vars(editor *t, user *u, server *s)
 
 // Procura 'nome' recebido por parametro na base de dados recebida por parametro
 
-	int verifica_user( char *nome, char *file ) {
+	int verifica_user( char *nome, char *file) {
 		
 		char user[8];
 		
@@ -96,8 +96,8 @@ void inicia_vars(editor *t, user *u, server *s)
 			printf("Número de linhas: %d\n", t.nlinhas);
 			printf("Número de colunas: %d\n", t.ncolunas);
 			printf("Nome da base de dados: %s\n", s.fich_nome);
-			printf("Número de named pipes a utilizar: \n");
-			printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
+			/*printf("Número de named pipes a utilizar: %s\n", s.n_named_pipes);
+			printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);*/
 		}
 
 
@@ -131,6 +131,13 @@ void inicia_vars(editor *t, user *u, server *s)
 				break;
 			}
 
+
+			if (optind < argc)
+				{
+					printf("[ERRO] Comando mal executado, consulte -help.",argv[optind++]);
+					putchar('\n');
+					exit(0);
+				}
 			// se receber, compara o comando recebido
 			// quer pela long form ou pela short form
 			// Exemplo: -d / --definicoes
@@ -197,13 +204,6 @@ void inicia_vars(editor *t, user *u, server *s)
 					abort();
 			}
 
-			// mostra os argumentos dos comandos que estão a ser inseridos com + do que um argumento 
-
-			if (optind < argc)
-				{
-					printf("[ERRO] Argumento '%s' foi inserido a mais.",argv[optind++]);
-					putchar('\n');
-				}
 			
 			exit(0);
 		}

@@ -1,15 +1,21 @@
 #ifndef STRUCTS
 #define STRUCTS
 
+// libs
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ncurses.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <unistd.h>
 #include <ctype.h>
 #include <getopt.h>
+
+// defines
+#define MAXLINES 15
+#define MAXCOLUMNS 45
+#define TIME_OUT 10
+#define MAXUSERS 3
 
 typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_palavras, n_letras, n_named_pipes, fich_utilizadores;
