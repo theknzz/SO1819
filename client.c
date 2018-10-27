@@ -4,7 +4,7 @@
 
 void criar_editor()
 {
-    int tecla, i;
+    int tecla = 0;
     editor t;
     char tab[t.nlinhas][t.ncolunas];
     WINDOW *janela;  // ponteiro para uma janela(como se fosse para um ficheiro)
@@ -16,7 +16,7 @@ void criar_editor()
 
     janela = newwin(17, 48, 2, 3); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
 
-    box(janela, ACS_VLINE, ACS_HLINE);  //Criação do border (WINDOW, tipo de border, tipo de border)
+    box(janela, ' ', ACS_HLINE);  //Criação do border (WINDOW, tipo de border, tipo de border)
 
     scrollok(janela, TRUE); // Não permite as cenas passarem para fora da janela (WINDOW, TRUE ou FALSE)
     keypad(janela, TRUE);  // Permite ler as letras do teclado (FALSE por default)
@@ -25,19 +25,19 @@ void criar_editor()
     init_pair(2, COLOR_BLACK, COLOR_RED);
     wbkgd(janela, COLOR_PAIR(1));
 
-    /*t.l_atual = 1;
+    t.l_atual = 1;
     t.c_atual = 0;
-    wrefresh(janela);
 
-    for(i=0; i < t.nlinhas; ++i)
-    {
-        wmove(janela, t.l_atual, t.c_atual);
-        wprintw(janela, "%d_", i);
+    while(1){
+        mvwprintw(janela, t.l_atual, t.c_atual, "%d", (tecla + 1));
+        if(t.l_atual == 15)
+            break;
         t.l_atual++;
-    }*/
+        tecla++;
+    }
 
     t.l_atual = 1;
-    t.c_atual = 1;
+    t.c_atual = 2;
 
     wmove(janela, t.l_atual, t.c_atual); // Move o cursor da janela para uma posição da janela
 
@@ -69,13 +69,20 @@ void criar_editor()
             wmove(janela, t.l_atual, t.c_atual - 1);
             break;
         case 10: // No caso de ENTER
-            echo(); // Mostra as letras
             wrefresh(janela);
             while (1)
             {
                 attron(COLOR_PAIR(2));
                 tecla = wgetch(janela);
                 getyx(janela, t.l_atual, t.c_atual);
+                if(t.c_atual >= 2 && t.c_atual <= 46){
+                    echo();
+                }
+                else if(t.c_atual >= 46)
+                    wmove(janela, t.l_atual, t.c_atual - 1);
+                else
+                    wmove(janela, t.l_atual, t.c_atual + 1);
+                
                 switch (tecla)
                 {
                 case KEY_RIGHT:
@@ -88,19 +95,25 @@ void criar_editor()
                         break;
                     wmove(janela, t.l_atual, t.c_atual - 1);
                     break;
+                case KEY_BACKSPACE:
+                    if(t.c_atual == 3)
+                        break;
+                    wdelch(janela);
+                case KEY_DC:
+                    wdelch(janela);
                 }
                 if (tecla == 27) //No caso de ESC
                 {
                     //descarta_info();
                     noecho();
-                    attroff(COLOR_PAIR(2));
+                    wmove(janela, t.l_atual, 2);
                     break;
                 }
-                if(tecla = 10)
+                if(tecla == 10)
                 {
                     //guarda_info();
                     noecho();
-                    attroff(COLOR_PAIR(2));
+                    wmove(janela, t.l_atual, 2);
                     break;
                 }
             }
@@ -114,22 +127,6 @@ void criar_editor()
     wrefresh(janela);
     endwin(); // Encerra o ncurses
 }
-
-/*int main(int argc, char *argv) {
-	char str[11], *pal[3];
-	int n, i;
-	fgets(str,12,stdin);
-	puts(str);
-	str[strlen(str)-1] = '\0';
-	n = 0;
-	pal[n] = strtok(str, " ");
-	n++;
-	while( (pal[n] = strtok( NULL, " ") ) != NULL)
-		n++;
-	for(i=0;i<n;i++)
-		printf("%s\n",pal[i]);
-	exit(0);
-}*/
 
 int main(int argc, char **argv)
 {
