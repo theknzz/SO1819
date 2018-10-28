@@ -104,8 +104,6 @@ void criar_editor()
                     wmove(janela, t.l_atual, t.c_atual + 1);
                 
                 echo();
-                
-                tecla = wgetch(janela);
 
                 switch (tecla)
                 {
@@ -126,19 +124,20 @@ void criar_editor()
                     case KEY_DC:
                         wdelch(janela);
                 }
-
                 if (tecla == 27) //No caso de ESC
                 {
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
                     wmove(janela, t.l_atual, 2);
-                    wdelch(janela);
-                break;
+                    break;
                 }
 
                 if(tecla == 10)
                 {
+                    attron(COLOR_PAIR(2));
+                    mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
+                    attroff(COLOR_PAIR(2));
                     noecho();
                     wmove(janela, t.l_atual, 2);
                     break;
