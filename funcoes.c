@@ -197,7 +197,7 @@ void inicia_vars(editor *t, user *u, server *s)
 					break;
 
 				case '?':
-					printf("\nConsulte -help para listar todos os comandos possiveis.");
+					printf("\nConsulte -help para listar todos os comandos possiveis.\n");
 					break;
 
 				default:
@@ -208,31 +208,3 @@ void inicia_vars(editor *t, user *u, server *s)
 			exit(0);
 		}
 	}
-
-
-
-/* 	void getUser(int argc, char **argv, server s)
-	{
-		int opt;
-		char fich[10];
-
-		strcpy(fich,"medit.db");
-
-		while ((opt = getopt(argc, argv, "u:")) != -1)
-		{
-			switch(opt)
-			{
-				case 'u':
-					printf("\nNome do base de dados: ");
-					scanf(" %9[^\n]", fich);
-					verifica_user(optarg,fich);
-					break;
-				case '?':
-					puts("flag");
-					break;
-			}
-		} 
-
-		exit(0);
-	}
-	*/
