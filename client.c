@@ -30,7 +30,6 @@ void criar_editor()
 
     box(janela, ' ', ACS_HLINE);  //Criação do border (WINDOW, tipo de border, tipo de border)
 
-    scrollok(janela, TRUE); // Não permite as cenas passarem para fora da janela (WINDOW, TRUE ou FALSE)
     keypad(janela, TRUE);  // Permite ler as letras do teclado (FALSE por default)
 
     init_pair(1, COLOR_CYAN, COLOR_BLACK);
@@ -104,6 +103,7 @@ void criar_editor()
                     wmove(janela, t.l_atual, t.c_atual + 1);
                 
                 echo();
+                idlok(janela, TRUE);
                 tecla = wgetch(janela);
 
                 switch (tecla)
@@ -131,6 +131,7 @@ void criar_editor()
                     mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
                     wmove(janela, t.l_atual, 2);
+                    wclrtoeol(janela);
                     break;
                 }
 
