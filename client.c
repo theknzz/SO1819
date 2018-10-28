@@ -75,7 +75,7 @@ void criar_editor(WINDOW *janela, editor *t)
             {
                 getyx(janela, t->l_atual, t->c_atual);
 
-				if(t->c_atual >= 46)
+				if(t->c_atual >= t->ncolunas + 2)
                     wmove(janela, t->l_atual, t->c_atual - 1);
                 else if (t->c_atual < 2)
                     wmove(janela, t->l_atual, t->c_atual + 1);
@@ -105,6 +105,7 @@ void criar_editor(WINDOW *janela, editor *t)
                     case KEY_DC:
                         wdelch(janela);
                 }
+
                 if (tecla == 27) //No caso de ESC
                 {
                     attron(COLOR_PAIR(2));
