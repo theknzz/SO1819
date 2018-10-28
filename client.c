@@ -19,6 +19,7 @@ void criar_editor()
     editor t;
     char tab[t.nlinhas][t.ncolunas];
     WINDOW *janela;  // ponteiro para uma janela(como se fosse para um ficheiro)
+    
     initscr(); // inicializa o uso do ncurses
     start_color(); // inicia as cores
     clear();   // limpa o ecrã
@@ -131,8 +132,8 @@ void criar_editor()
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
-                   wmove(janela, t.l_atual, 2);
-                   wdelch(janela);
+                    wmove(janela, t.l_atual, 2);
+                    wdelch(janela);
                 break;
                 }
 
