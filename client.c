@@ -3,18 +3,14 @@
 #include "server.h"
 
 /* void guarda_info(WINDOW *janela, char *tab[linha][coluna]) {
-
     curs_set(0); // invisible cursor
     char str[t.ncolunas];
     gety(janela, linha);
-
     mvwscanw(janela, linha, 0, "%s", str);
-
     for (i=2;i<t.ncolunas;i++) 
     {
         strcpy(tab[linha][i], str[i-2]);
     }
-
 } */
 
 void criar_editor()
@@ -84,6 +80,10 @@ void criar_editor()
             wmove(janela, t.l_atual, t.c_atual - 1);
             break;
         case 10: // No caso de ENTER
+            attron(COLOR_PAIR(2));
+            mvwchgat(janela, t.l_atual, 0, 2, 0, 2, NULL);
+            attroff(COLOR_PAIR(2));
+            wmove(janela, t.l_atual, t.c_atual);
             wrefresh(janela);
             while (1)
             {
@@ -97,9 +97,9 @@ void criar_editor()
                     wmove(janela, t.l_atual, t.c_atual + 1);
                  */
 
-				if(t.c_atual >=46)
+				if(t.c_atual >= 46)
                     wmove(janela, t.l_atual, t.c_atual - 1);
-                else if (t.c_atual <2)
+                else if (t.c_atual < 2)
                     wmove(janela, t.l_atual, t.c_atual + 1);
                 
                 echo();
@@ -119,16 +119,19 @@ void criar_editor()
                         wmove(janela, t.l_atual, t.c_atual - 1);
                         break;
                     case KEY_BACKSPACE:
-                        if(t.c_atual == 3)
-                            break;
-                        wdelch(janela);
+                        if(t.c_atual >= 3)
+                            wdelch(janela);
+                        break;
                     case KEY_DC:
                         wdelch(janela);
                 }
 
                 if (tecla == 27) //No caso de ESC
                 {
-                   wmove(janela, t.l_atual,2);
+                    attron(COLOR_PAIR(2));
+                    mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
+                    attroff(COLOR_PAIR(2));
+                   wmove(janela, t.l_atual, 2);
                    wdelch(janela);
                 break;
                 }
