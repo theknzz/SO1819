@@ -2,10 +2,23 @@
 #include "client.h"
 #include "server.h"
 
-void criar_editor(WINDOW *janela, editor *t)
+void guarda_info(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
+{
+    int coluna;
+
+    //mvwprintw(janela, 13, 20, "%d", t->l_atual);
+
+    for(coluna = 0; coluna<t->ncolunas; coluna++){
+        mvwscanw(janela, t->l_atual, t->c_atual + 2, "%c", &tab[t->l_atual - 1][coluna]);
+        //mvwprintw(janela, t->l_atual + 1, 2, "%c", tab[t->l_atual][coluna]);
+        t->c_atual++;
+    }
+}
+
+void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 {
     int tecla = 0;
-    
+    char x;
     initscr(); // inicializa o uso do ncurses
     start_color(); // inicia as cores
     clear();   // limpa o ecrã
@@ -83,7 +96,6 @@ void criar_editor(WINDOW *janela, editor *t)
                     wmove(janela, t->l_atual, t->c_atual +2);
 
                 echo();
-                idlok(janela, TRUE);
                 tecla = wgetch(janela);
 
                 switch (tecla)
@@ -99,14 +111,13 @@ void criar_editor(WINDOW *janela, editor *t)
                         wmove(janela, t->l_atual, t->c_atual - 1);
                         break;
                     case KEY_BACKSPACE:
-                        if(t->c_atual >= 2)
+                        if(t->c_atual >= 3)
                             wdelch(janela);
                         break;
                     case KEY_DC:
                         wdelch(janela);
                         break;
                 }
-
                 if (tecla == 27) //No caso de ESC
                 {
                     attron(COLOR_PAIR(2));
@@ -123,6 +134,7 @@ void criar_editor(WINDOW *janela, editor *t)
                     mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
                     wmove(janela, t->l_atual, 2);
+                    guarda_info(janela, t, tab);
                     break;
                 }
             }
@@ -144,8 +156,13 @@ int main(int argc, char **argv)
     user u;
     server s;
     WINDOW *janela;
+
     inicia_vars(&t,&u,&s);
-    criar_editor(janela,&t);
+    
+    char tab[t.nlinhas][t.ncolunas];
+
+    criar_editor(janela, &t, tab);
 
     return 0;
+
 }
