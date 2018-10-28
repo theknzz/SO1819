@@ -2,11 +2,9 @@
 #include "client.h"
 #include "server.h"
 
-void criar_editor()
+void criar_editor(WINDOW *janela, editor *t)
 {
     int tecla = 0;
-    editor t;
-    WINDOW *janela;  // ponteiro para uma janela(como se fosse para um ficheiro)
     
     initscr(); // inicializa o uso do ncurses
     start_color(); // inicia as cores
@@ -24,65 +22,65 @@ void criar_editor()
     init_pair(2, COLOR_BLACK, COLOR_BLUE);
     wbkgd(janela, COLOR_PAIR(1));
 
-    t.l_atual = 1;
-    t.c_atual = 0;
+    t->l_atual = 1;
+    t->c_atual = 0;
 
     while(1){
-        mvwprintw(janela, t.l_atual, t.c_atual, "%2d", (tecla + 1));
-        if(t.l_atual == 15)
+        mvwprintw(janela, t->l_atual, t->c_atual, "%2d", (tecla + 1));
+        if(t->l_atual == 15)
             break;
-        t.l_atual++;
+        t->l_atual++;
         tecla++;
     }
 
-    t.l_atual = 1;
-    t.c_atual = 2;
+    t->l_atual = 1;
+    t->c_atual = 2;
 
-    wmove(janela, t.l_atual, t.c_atual); // Move o cursor da janela para uma posição da janela
+    wmove(janela, t->l_atual, t->c_atual); // Move o cursor da janela para uma posição da janela
 
     wrefresh(janela);  // Atualiza a janela
     while (1)
     {
         tecla = wgetch(janela); // Capta um caracter da janela e devolve o inteiro correspondente
-        getyx(janela, t.l_atual, t.c_atual);  // Atribui as coordenadas do cursor para as variáveis
+        getyx(janela, t->l_atual, t->c_atual);  // Atribui as coordenadas do cursor para as variáveis
         switch (tecla)
         {
         case KEY_UP:
-            if (t.l_atual == 1)  // Condições que não deixam o cursor tocar na box
+            if (t->l_atual == 1)  // Condições que não deixam o cursor tocar na box
                 break;
-            wmove(janela, t.l_atual - 1, t.c_atual);  // Movimentações do cursor 
+            wmove(janela, t->l_atual - 1, t->c_atual);  // Movimentações do cursor 
             break;                                    //(Nunca esquecer de identificar a janela)
         case KEY_DOWN:
-            if (t.l_atual == 15)
+            if (t->l_atual == 15)
                 break;
-            wmove(janela, t.l_atual + 1, t.c_atual);
+            wmove(janela, t->l_atual + 1, t->c_atual);
             break;
         case KEY_RIGHT:
-            if (t.c_atual == 46)
+            if (t->c_atual == 46)
                 break;
-            wmove(janela, t.l_atual, t.c_atual + 1);
+            wmove(janela, t->l_atual, t->c_atual + 1);
             break;
         case KEY_LEFT:
-            if (t.c_atual == 2)
+            if (t->c_atual == 2)
                 break;
-            wmove(janela, t.l_atual, t.c_atual - 1);
+            wmove(janela, t->l_atual, t->c_atual - 1);
             break;
         case 10: // No caso de ENTER
             attron(COLOR_PAIR(2));
-            mvwchgat(janela, t.l_atual, 0, 2, 0, 2, NULL);
+            mvwchgat(janela, t->l_atual, 0, 2, 0, 2, NULL);
             attroff(COLOR_PAIR(2));
-            wmove(janela, t.l_atual, t.c_atual);
+            wmove(janela, t->l_atual, t->c_atual);
             wrefresh(janela);
             while (1)
             {
-                getyx(janela, t.l_atual, t.c_atual);
+                getyx(janela, t->l_atual, t->c_atual);
 
-				if(t.c_atual >= 46)
-                    wmove(janela, t.l_atual, t.c_atual - 1);
-                else if (t.c_atual < 2)
-                    wmove(janela, t.l_atual, t.c_atual + 1);
-                else if (t.c_atual < 1)
-                    wmove(janela, t.l_atual, t.c_atual +2);
+				if(t->c_atual >= 46)
+                    wmove(janela, t->l_atual, t->c_atual - 1);
+                else if (t->c_atual < 2)
+                    wmove(janela, t->l_atual, t->c_atual + 1);
+                else if (t->c_atual < 1)
+                    wmove(janela, t->l_atual, t->c_atual +2);
 
                 echo();
                 idlok(janela, TRUE);
@@ -91,17 +89,17 @@ void criar_editor()
                 switch (tecla)
                 {
                     case KEY_RIGHT:
-                        if (t.c_atual == 46)
+                        if (t->c_atual == 46)
                             break;
-                        wmove(janela, t.l_atual, t.c_atual + 1);
+                        wmove(janela, t->l_atual, t->c_atual + 1);
                         break;
                     case KEY_LEFT:
-                        if (t.c_atual == 2)
+                        if (t->c_atual == 2)
                             break;
-                        wmove(janela, t.l_atual, t.c_atual - 1);
+                        wmove(janela, t->l_atual, t->c_atual - 1);
                         break;
                     case KEY_BACKSPACE:
-                        if(t.c_atual > 2)
+                        if(t->c_atual > 2)
                             wdelch(janela);
                         break;
                     case KEY_DC:
@@ -110,9 +108,9 @@ void criar_editor()
                 if (tecla == 27) //No caso de ESC
                 {
                     attron(COLOR_PAIR(2));
-                    mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
+                    mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
-                    wmove(janela, t.l_atual, 2);
+                    wmove(janela, t->l_atual, 2);
                     wclrtoeol(janela);
                     break;
                 }
@@ -120,9 +118,9 @@ void criar_editor()
                 if(tecla == 10)
                 {
                     attron(COLOR_PAIR(2));
-                    mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
+                    mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
-                    wmove(janela, t.l_atual, 2);
+                    wmove(janela, t->l_atual, 2);
                     break;
                 }
             }
@@ -143,8 +141,9 @@ int main(int argc, char **argv)
     editor t;
     user u;
     server s;
+    WINDOW *janela;
     inicia_vars(&t,&u,&s);
-    criar_editor();
+    criar_editor(janela,&t);
 
     return 0;
 }
