@@ -89,7 +89,7 @@ void criar_editor(WINDOW *janela, editor *t)
                 switch (tecla)
                 {
                     case KEY_RIGHT:
-                        if (t->c_atual == 46)
+                        if (t->c_atual == t->ncolunas+1)
                             break;
                         wmove(janela, t->l_atual, t->c_atual + 1);
                         break;
@@ -99,11 +99,12 @@ void criar_editor(WINDOW *janela, editor *t)
                         wmove(janela, t->l_atual, t->c_atual - 1);
                         break;
                     case KEY_BACKSPACE:
-                        if(t->c_atual > 2)
+                        if(t->c_atual >= 2)
                             wdelch(janela);
                         break;
                     case KEY_DC:
                         wdelch(janela);
+                        break;
                 }
 
                 if (tecla == 27) //No caso de ESC
@@ -126,7 +127,7 @@ void criar_editor(WINDOW *janela, editor *t)
                 }
             }
             noecho();
-            tecla = wgetch(janela);
+            tecla = 0; // Impedir saida do stdscr
             break;
         }
         if (tecla == 27)
