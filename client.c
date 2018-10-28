@@ -2,22 +2,10 @@
 #include "client.h"
 #include "server.h"
 
-/* void guarda_info(WINDOW *janela, char *tab[linha][coluna]) {
-    curs_set(0); // invisible cursor
-    char str[t.ncolunas];
-    gety(janela, linha);
-    mvwscanw(janela, linha, 0, "%s", str);
-    for (i=2;i<t.ncolunas;i++) 
-    {
-        strcpy(tab[linha][i], str[i-2]);
-    }
-} */
-
 void criar_editor()
 {
     int tecla = 0;
     editor t;
-    char tab[t.nlinhas][t.ncolunas];
     WINDOW *janela;  // ponteiro para uma janela(como se fosse para um ficheiro)
     
     initscr(); // inicializa o uso do ncurses
@@ -33,7 +21,7 @@ void criar_editor()
     keypad(janela, TRUE);  // Permite ler as letras do teclado (FALSE por default)
 
     init_pair(1, COLOR_CYAN, COLOR_BLACK);
-    init_pair(2, COLOR_BLACK, COLOR_RED);
+    init_pair(2, COLOR_BLACK, COLOR_BLUE);
     wbkgd(janela, COLOR_PAIR(1));
 
     t.l_atual = 1;
@@ -101,7 +89,9 @@ void criar_editor()
                     wmove(janela, t.l_atual, t.c_atual - 1);
                 else if (t.c_atual < 2)
                     wmove(janela, t.l_atual, t.c_atual + 1);
-                
+                else if (t.c_atual < 1)
+                    wmove(janela, t.l_atual, t.c_atual +2);
+                    
                 echo();
                 idlok(janela, TRUE);
                 tecla = wgetch(janela);
@@ -119,7 +109,7 @@ void criar_editor()
                         wmove(janela, t.l_atual, t.c_atual - 1);
                         break;
                     case KEY_BACKSPACE:
-                        if(t.c_atual >= 3)
+                        if(t.c_atual > 2)
                             wdelch(janela);
                         break;
                     case KEY_DC:
@@ -158,7 +148,10 @@ void criar_editor()
 
 int main(int argc, char **argv)
 {
-    //getUser(argc, argv);
+    editor t;
+    user u;
+    server s;
+    inicia_vars(&t,&u,&s);
     criar_editor();
 
     return 0;
