@@ -1,3 +1,4 @@
+
 #include "structs.h"
 #include "client.h"
 #include "server.h"
@@ -6,15 +7,12 @@ void guarda_info(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 {
     int coluna;
 
-    //mvwprintw(janela, 13, 20, "%d", t->l_atual);
-
-    for(coluna = 0; coluna<t->ncolunas; coluna++){
-        mvwscanw(janela, t->l_atual, t->c_atual + 2, "%c", &tab[t->l_atual - 1][coluna]);
+    for(coluna = 0, t->c_atual = 2; coluna < t->ncolunas && t->c_atual < t->ncolunas; coluna++, t->c_atual++)
+    {
+        mvwscanw(janela, t->l_atual, t->c_atual, "%c", &tab[t->l_atual - 1][coluna]);
         //mvwprintw(janela, t->l_atual + 1, 2, "%c", tab[t->l_atual][coluna]);
-        t->c_atual++;
     }
 }
-
 void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 {
     int tecla = 0;
@@ -93,9 +91,10 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                 else if (t->c_atual < 2)
                     wmove(janela, t->l_atual, t->c_atual + 1);
                 else if (t->c_atual < 1)
-                    wmove(janela, t->l_atual, t->c_atual +2);
+                    wmove(janela, t->l_atual, t->c_atual + 2);
 
                 echo();
+                
                 tecla = wgetch(janela);
 
                 switch (tecla)
@@ -117,24 +116,33 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                     case KEY_DC:
                         wdelch(janela);
                         break;
+
+                    case 27:
+                        attron(COLOR_PAIR(2));
+                        mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
+                        attroff(COLOR_PAIR(2));
+                        wmove(janela, t->l_atual, 2);
+                        wclrtoeol(janela);
+                        break;
+                    
+                    case 10:
+                        attron(COLOR_PAIR(2));
+                        mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
+                        attroff(COLOR_PAIR(2));
+                        wmove(janela, t->l_atual, 2);
+                        break;
                 }
+
+
                 if (tecla == 27) //No caso de ESC
                 {
-                    attron(COLOR_PAIR(2));
-                    mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
-                    attroff(COLOR_PAIR(2));
-                    wmove(janela, t->l_atual, 2);
-                    wclrtoeol(janela);
                     break;
                 }
+                else 
+                    //guarda_info(janela, t, tab);
 
                 if(tecla == 10)
                 {
-                    attron(COLOR_PAIR(2));
-                    mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
-                    attroff(COLOR_PAIR(2));
-                    wmove(janela, t->l_atual, 2);
-                    guarda_info(janela, t, tab);
                     break;
                 }
             }

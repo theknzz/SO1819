@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <curses.h>
 
 // defines
 #define MAXLINES 15

@@ -210,6 +210,7 @@ void inicia_vars(editor *t, user *u, server *s)
 	}
 
 
+
 /* 	void getUser(int argc, char **argv, server s)
 	{
 		int opt;
