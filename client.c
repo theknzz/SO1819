@@ -131,6 +131,10 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                         attroff(COLOR_PAIR(2));
                         wmove(janela, t->l_atual, 2);
                         break;
+
+                    default:
+                        winsch(janela, tecla);
+                        break;
                 }
 
 
