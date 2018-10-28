@@ -12,7 +12,7 @@ void criar_editor(WINDOW *janela, editor *t)
     noecho();   // não permite que se vejam teclas no ecrã
     cbreak();   // caso haja um ^C acaba o programa
 
-    janela = newwin(17, 48, 2, 3); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
+    janela = newwin(t->nlinhas + 2, t->ncolunas + 3, 2, 3); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
 
     box(janela, ' ', ACS_HLINE);  //Criação do border (WINDOW, tipo de border, tipo de border)
 
@@ -27,7 +27,7 @@ void criar_editor(WINDOW *janela, editor *t)
 
     while(1){
         mvwprintw(janela, t->l_atual, t->c_atual, "%2d", (tecla + 1));
-        if(t->l_atual == 15)
+        if(t->l_atual == t->nlinhas)
             break;
         t->l_atual++;
         tecla++;
