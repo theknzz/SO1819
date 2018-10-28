@@ -104,6 +104,7 @@ void criar_editor()
                     wmove(janela, t.l_atual, t.c_atual + 1);
                 
                 echo();
+                tecla = wgetch(janela);
 
                 switch (tecla)
                 {
@@ -138,11 +139,11 @@ void criar_editor()
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t.l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
-                    noecho();
                     wmove(janela, t.l_atual, 2);
                     break;
                 }
             }
+            noecho();
             tecla = wgetch(janela);
             break;
         }
