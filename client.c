@@ -124,7 +124,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 
                 echo();
                 tecla2 = wgetch(janela);
-
+                
                 switch (tecla2)
                 {
                 case KEY_STAB:
@@ -176,19 +176,26 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                     mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
                     wmove(janela, t->l_atual, 2);
+                    for (i = 0; i < t->ncolunas; i++)
+                    {
+                        mvwprintw(janela, t->l_atual, i + 2, "%c", tab[t->l_atual][i]);
+                    }
+                    wmove(janela, t->l_atual, t->c_atual);
+                    tecla2 = 0;
                     break;
 
                 case 10:
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
                     attroff(COLOR_PAIR(2));
-                    wmove(janela, t->l_atual, 2);
+                    wmove(janela, t->l_atual, t->c_atual);
                     break;
 
                 default:
-
-                    if (aux[t->ncolunas - 1] != ' ')
+                    if(aux[t->ncolunas - 1] != ' '){
+                        wrefresh(janela);
                         break;
+                    }
 
                     for (i = t->ncolunas - 1; i >= t->c_atual; i--)
                     {
