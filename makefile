@@ -7,13 +7,13 @@ server.o: server.c server.h structs.h
 	gcc server.c -c
 
 client: client.o funcoes.o
-	gcc client.o funcoes.o -o client -lncurses
+	gcc client.o funcoes.o -o client -lncurses -g
 
 client.o: client.c client.h structs.h
-	gcc client.c -c
+	gcc client.c -c -g
 
 funcoes.o: funcoes.c
-	gcc funcoes.c -c
+	gcc funcoes.c -c -g
 
 clean:
 	rm server.o client.o funcoes.o

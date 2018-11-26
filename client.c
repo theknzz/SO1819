@@ -110,6 +110,8 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
             {
                 aux[i] = tab[t->l_atual][i];
             }
+            
+            tecla2 = 0;
 
             while (tecla2 != 27)
             {
@@ -180,7 +182,6 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                         mvwprintw(janela, t->l_atual, i + 2, "%c", tab[t->l_atual][i]);
                     }
                     wmove(janela, t->l_atual, t->c_atual);
-                    tecla2 = 0;
                     break;
 
                 case 10:

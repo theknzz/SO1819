@@ -19,7 +19,7 @@
 #define MAXUSERS 3
 
 typedef struct Server {
-    int n_utilizadores, n_utilizadores_max, n_palavras, n_letras, n_named_pipes, fich_utilizadores;
+    int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
     char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
 } server;
 
@@ -34,8 +34,7 @@ typedef struct Avisos {
 } avisos;
 
 typedef struct Editor {
-    int nlinhas, ncolunas;
-    int l_atual, c_atual;
+    int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras;
 } editor;
 
 #endif
