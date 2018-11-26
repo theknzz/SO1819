@@ -122,7 +122,6 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                 else if (t->c_atual < 1)
                     wmove(janela, t->l_atual, t->c_atual + 2);
 
-                echo();
                 tecla2 = wgetch(janela);
                 
                 switch (tecla2)
@@ -193,10 +192,11 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 
                 default:
                     if(aux[t->ncolunas - 1] != ' '){
-                        wrefresh(janela);
+                        noecho();
                         break;
                     }
 
+                    echo();
                     for (i = t->ncolunas - 1; i >= t->c_atual; i--)
                     {
                         aux[i] = aux[i - 1];
@@ -208,6 +208,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                     {
                         mvwprintw(janela, t->l_atual, i + 2, "%c", aux[i]);
                     }
+                    
                     t->c_atual++;
                     wmove(janela, t->l_atual, t->c_atual);
                     break;
