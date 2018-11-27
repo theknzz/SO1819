@@ -1,18 +1,6 @@
-
 #include "structs.h"
 #include "client.h"
 #include "server.h"
-
-/*void guarda_info(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
-{
-    int coluna;
-
-    for(coluna = 0, t->c_atual = 2; coluna < t->ncolunas && t->c_atual < t->ncolunas; coluna++, t->c_atual++)
-    {
-        mvwscanw(janela, t->l_atual, t->c_atual, "%c", &tab[t->l_atual - 1][coluna]);
-        //mvwprintw(janela, t->l_atual + 1, 2, "%c", tab[t->l_atual][coluna]);
-    }
-}*/
 
 void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
 {
@@ -29,7 +17,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
     {
         for (j = 0; j < t->ncolunas; j++)
         {
-            tab[i][j] = ' '; // inicialização da tabela
+            tab[i][j] = ' '; // inicialização da tabela como espaços
         }
     }
 
@@ -44,31 +32,16 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
     wbkgd(janela, COLOR_PAIR(1));
 
     t->l_atual = 1;
-    t->c_atual = 0;
+    t->c_atual = 2;
 
     for (i = 0; i < t->nlinhas; i++)
     {
-        mvwprintw(janela, t->l_atual, t->c_atual, "%2d", (i + 1));
-        if (t->l_atual == t->nlinhas)
-            break;
-        t->l_atual++;
-    }
-
-    t->l_atual = 1;
-
-    for (i = 0; i < t->nlinhas; i++)
-    {
-        t->c_atual = 2;
+        mvwprintw(janela, t->l_atual + i, t->c_atual - 2, "%2d", i); // Imprime o respetivo numero na linhas
         for (j = 0; j < t->ncolunas; j++)
         {
-            mvwprintw(janela, t->l_atual, t->c_atual, " ");
-            t->c_atual++;
+            mvwprintw(janela, t->l_atual, t->c_atual + j, " "); // Inicializa o ecrã com espaços
         }
-        t->l_atual++;
-    } //inicializar o ambiente do editor
-
-    t->l_atual = 1;
-    t->c_atual = 2;
+    }
 
     wmove(janela, t->l_atual, t->c_atual); // Move o cursor da janela para uma posição da janela
 
@@ -102,16 +75,16 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
         case 10: // No caso de ENTER
             attron(COLOR_PAIR(2));
             mvwchgat(janela, t->l_atual, 0, 2, 0, 2, NULL);
-            attroff(COLOR_PAIR(2));
+            attroff(COLOR_PAIR(2)); // Adiciona cor às linhas
             wmove(janela, t->l_atual, t->c_atual);
             wrefresh(janela);
 
             for (i = 0; i < t->ncolunas; i++)
             {
-                aux[i] = tab[t->l_atual][i];
-            }
+                aux[i] = tab[t->l_atual - 1][i];
+            } // Cópia da tabela do editor para um vetor auxiliar
             
-            tecla2 = 0;
+            tecla2 = 0; // Para impedir que salte o ciclo ao repetir
 
             while (tecla2 != 27)
             {
@@ -150,21 +123,21 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                         for (i = t->c_atual - 2; i < t->ncolunas; i++)
                         {
                             aux[i - 1] = aux[i];
-                        }
-                        aux[t->ncolunas - 1] = ' ';
+                        } //Puxa as teclas todas à direita para trás, o primeiro valor à esquerda é apagado
+                        aux[t->ncolunas - 1] = ' '; // Acrescenta um espaço no fim da tabela auxiliar
                         for (i = 0; i < t->ncolunas; i++)
                         {
                             mvwprintw(janela, t->l_atual, i + 2, "%c", aux[i]);
                         }
-                        wmove(janela, t->l_atual, t->c_atual - 1);
+                        wmove(janela, t->l_atual, t->c_atual - 1);// Move o cursor uma posição para trás
                     }
                     break;
                 case KEY_DC:
-                    for (i = t->c_atual - 1; i < t->ncolunas; i++)
+                    for (i = t->c_atual - 2; i < t->ncolunas; i++)
                     {
                         aux[i] = aux[i + 1];
-                    }
-                    aux[t->ncolunas - 1] = ' ';
+                    }//Puxa as teclas todas à direita para trás, o primeiro valor à direita é apagado
+                    aux[t->ncolunas - 1] = ' ';// Acrescenta um espaço no fim da tabela auxiliar
                     for (i = 0; i < t->ncolunas; i++)
                     {
                         mvwprintw(janela, t->l_atual, i + 2, "%c", aux[i]);
@@ -175,11 +148,11 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                 case 27:
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
-                    attroff(COLOR_PAIR(2));
+                    attroff(COLOR_PAIR(2)); // Retira a cor das linhas
                     wmove(janela, t->l_atual, 2);
                     for (i = 0; i < t->ncolunas; i++)
                     {
-                        mvwprintw(janela, t->l_atual, i + 2, "%c", tab[t->l_atual][i]);
+                        mvwprintw(janela, t->l_atual, i + 2, "%c", tab[t->l_atual - 1][i]);
                     }
                     wmove(janela, t->l_atual, t->c_atual);
                     break;
@@ -187,7 +160,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                 case 10:
                     attron(COLOR_PAIR(2));
                     mvwchgat(janela, t->l_atual, 0, 2, 0, 1, NULL);
-                    attroff(COLOR_PAIR(2));
+                    attroff(COLOR_PAIR(2));  // Retira a cor das linhas
                     wmove(janela, t->l_atual, t->c_atual);
                     break;
 
@@ -195,23 +168,23 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                     if(aux[t->ncolunas - 1] != ' '){
                         noecho();
                         break;
-                    }
+                    }// Verifica se a última posição da tabela está vazia para que não se escreva por cima
 
                     echo();
-                    for (i = t->ncolunas - 1; i >= t->c_atual; i--)
+                    for (i = t->ncolunas - 1; i >= t->c_atual - 2; i--)
                     {
                         aux[i] = aux[i - 1];
-                    }
-                    aux[t->c_atual - 2] = tecla2;
+                    }// Puxa as letras todas uma casa para a frente
+                    
+                    aux[t->c_atual - 2] = tecla2;// Atribui à casa atual a letra que recebeu
                     //t->n_palavras++;
 
                     for (i = 0; i < t->ncolunas; i++)
                     {
                         mvwprintw(janela, t->l_atual, i + 2, "%c", aux[i]);
-                    }
+                    }// Imprime a linha
                     
-                    t->c_atual++;
-                    wmove(janela, t->l_atual, t->c_atual);
+                    wmove(janela, t->l_atual, t->c_atual + 1);// Move o cursor uma posição para a frente
                     break;
                 }
 
@@ -219,10 +192,10 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas])
                 {
                     for (i = 0; i < t->ncolunas; i++)
                     {
-                        tab[t->l_atual][i] = aux[i];
+                        tab[t->l_atual - 1][i] = aux[i];
                     }
                     break;
-                }
+                } // Copia os valores da tabela auxiliar para a tabela do editor
             }
             noecho();
             break;
