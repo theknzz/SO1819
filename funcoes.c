@@ -10,6 +10,9 @@ void inicia_vars(editor *t, user *u, server *s)
 		// Se as variaveis ambiente não existirem são iniciadas com os valores predefinidos no enunciado
 		// caso existão o valor delas é passado a inteiro pela funcao 'atoi()' e depois passado à estrutura
 
+		//strcpy(s->nome_pipe_p, "sss");
+		//sprintf(SERVER_FIFO_P, SERVER_FIFO_P ,s->nome_pipe_p);
+
 		// editor
 
 		if (getenv("MEDIT_MAXLINES") != NULL) 
@@ -95,15 +98,16 @@ void inicia_vars(editor *t, user *u, server *s)
 			printf("\n\n\n");
 			printf("Número de linhas: %d\n", t.nlinhas);
 			printf("Número de colunas: %d\n", t.ncolunas);
+			strcpy(s.fich_nome, "debbuing here...");
 			printf("Nome da base de dados: %s\n", s.fich_nome);
-			/*printf("Número de named pipes a utilizar: %s\n", s.n_named_pipes);
-			printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);*/
+			//printf("Número de named pipes a utilizar: %s\n", s.n_named_pipes);
+			//printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
 		}
 
 
 // Recebe opcao do servidor
 
-	void getOption(int argc, char **argv, editor t, user u, server s) {
+	void getOption(int argc, char **argv, editor *t, user *u, server *s) {
 
 		int c;
 
@@ -124,7 +128,7 @@ void inicia_vars(editor *t, user *u, server *s)
 
 			int option_index = 0; 
 
-			c = getopt_long (argc,argv,"dc:g:l:eutsh",long_options,&option_index);
+			c = getopt_long (argc,argv,"dc:g:l:eutshp:n:",long_options,&option_index);
 
 			if(c == -1)   // se o getopt não receber nenhum comando
 			{
@@ -138,6 +142,7 @@ void inicia_vars(editor *t, user *u, server *s)
 					putchar('\n');
 					exit(0);
 				}
+
 			// se receber, compara o comando recebido
 			// quer pela long form ou pela short form
 			// Exemplo: -d / --definicoes
@@ -153,7 +158,7 @@ void inicia_vars(editor *t, user *u, server *s)
 					break;
 
 				case 'd':
-					mostra_def(t,s);
+					mostra_def(*t,*s);
 					break;
 
 				case 'c':
@@ -196,6 +201,15 @@ void inicia_vars(editor *t, user *u, server *s)
 					printf("'-s'        \tou\tsair              \tTermina a edição em curso emediatamente.\n");
 					break;
 
+				case 'p':
+					// strcpy(s->nome_pipe_p, SERVER_FIFO_P);
+					// sprintf(SERVER_FIFO_P, SERVER_FIFO_P, s->nome_pipe_p);
+					printf("O novo nome do pipe principal é : %s\n", s->nome_pipe_p);
+					break;
+
+				case 'n':
+					printf("O numero de NPs agora é %d\n", atoi(optarg));
+					break;
 				case '?':
 					printf("\nConsulte -help para listar todos os comandos possiveis.\n");
 					break;
@@ -203,8 +217,7 @@ void inicia_vars(editor *t, user *u, server *s)
 				default:
 					abort();
 			}
-
-			
-			exit(0);
+			break;
+			//exit(0);
 		}
 	}
