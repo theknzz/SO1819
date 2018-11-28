@@ -10,8 +10,7 @@ void inicia_vars(editor *t, user *u, server *s)
 		// Se as variaveis ambiente não existirem são iniciadas com os valores predefinidos no enunciado
 		// caso existão o valor delas é passado a inteiro pela funcao 'atoi()' e depois passado à estrutura
 
-		//strcpy(s->nome_pipe_p, "sss");
-		//sprintf(SERVER_FIFO_P, SERVER_FIFO_P ,s->nome_pipe_p);
+
 
 		// editor
 
@@ -65,14 +64,17 @@ void inicia_vars(editor *t, user *u, server *s)
 
 // Procura 'nome' recebido por parametro na base de dados recebida por parametro
 
-	int verifica_user( char *nome, char *file) {
+	int verifica_user( char *nome, server * s) {
 		
 		char user[8];
-		
-		FILE  *f = fopen(file,"r");
+
+		if(strlen(s->fich_nome) == 0)
+			strcpy(s->fich_nome, "medit.db");
+
+		FILE  *f = fopen(s->fich_nome,"r");
 		if(f == NULL)
 		{
-			printf("\nErro ao abrir o ficheiro '%s'\n", file); // se a base de dados recebida nao existir ou houver algum problema na sua abertura
+			printf("\nErro ao abrir o ficheiro '%s'\n", s->fich_nome); // se a base de dados recebida nao existir ou houver algum problema na sua abertura
 			return 0;
 		}
 
@@ -118,6 +120,7 @@ void inicia_vars(editor *t, user *u, server *s)
 				{"carregar", required_argument, 0, 'c'},
 				{"guardar", required_argument, 0, 'g'},
 				{"liberta", required_argument, 0, 'l'},
+				{"ficheiro", required_argument, 0, 'f'},
 				{"estatisticas", no_argument, 0, 'e'},
 				{"utilizadores", no_argument, 0, 'u'},
 				{"texto", no_argument, 0, 't'},
@@ -128,7 +131,7 @@ void inicia_vars(editor *t, user *u, server *s)
 
 			int option_index = 0; 
 
-			c = getopt_long (argc,argv,"dc:g:l:eutshp:n:",long_options,&option_index);
+			c = getopt_long (argc,argv,"dc:g:l:eutshp:n:f:",long_options,&option_index);
 
 			if(c == -1)   // se o getopt não receber nenhum comando
 			{
@@ -210,14 +213,17 @@ void inicia_vars(editor *t, user *u, server *s)
 				case 'n':
 					printf("O numero de NPs agora é %d\n", atoi(optarg));
 					break;
+				case 'f':
+					strcpy(s->fich_nome, optarg);
+					printf("Base de dados: %s", s->fich_nome);
+					break;
 				case '?':
 					printf("\nConsulte -help para listar todos os comandos possiveis.\n");
 					break;
 
 				default:
-					abort();
+					break;
 			}
 			break;
-			//exit(0);
 		}
 	}

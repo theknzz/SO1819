@@ -27,6 +27,7 @@
 #define SERVER_FIFO_P "sss"
 #define NR_NP 2
 #define CLIENT_FIFO "ccc%d"
+#define VAL_FIFO "vvv%d"
 
 typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
@@ -47,6 +48,13 @@ typedef struct Editor {
     int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras;
 } editor;
 
+typedef struct Valida {
+    //char file[10];
+    pid_t pid_user;
+    int ver;
+    char nome[8];
+} valida;
+
 typedef struct Request {
     pid_t pid_cliente;
     int nr_linha;    
@@ -56,7 +64,5 @@ typedef struct Controlo {
     int perm;
     char np_name[10];
 } controlo;
-
-
 
 #endif

@@ -1,5 +1,6 @@
 all: server client clean 
 
+
 server: server.o funcoes.o
 	gcc server.o funcoes.o -o server
 
