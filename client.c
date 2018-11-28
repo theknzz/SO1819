@@ -2,32 +2,26 @@
 #include "client.h"
 #include "server.h"
 
-	void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], int s_fifo_fd)
+void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_fname[20])
 {
     int tecla, i = 0, j, coluna_ini = 2;
     int tecla2;
     char x, aux[t->ncolunas], res;
 
-    int c_fifo_fd;
+    int c_fifo_fd, inter_fifo_fd;
     char c_fifo_fname[20];
-
-    //int s_fifo_fd, c_fifo_fd;
     request req;
     controlo ctrl;
-    //char c_fifo_fname[20];
 
-        // preenche o id do request
-        req.pid_cliente = getpid();
-        sprintf(c_fifo_fname, CLIENT_FIFO, req.pid_cliente);
+    // preenche o id do request
+    req.pid_cliente = getpid();
+    sprintf(c_fifo_fname, CLIENT_FIFO, req.pid_cliente);
 
-        // cria o pipe
-        res = mkfifo(c_fifo_fname, 0600);  
-        if (res == -1){
-            //perror("\nmkfifo FIFO do cliente deu erro");
-            exit(EXIT_FAILURE);
-        }
-        //fprintf(stderr, "\nFIFO do cliente criado");
-
+    // cria o pipe
+    res = mkfifo(c_fifo_fname, 0600);  
+    if (res == -1)
+        exit(EXIT_FAILURE);
+    
 
     initscr();     // inicializa o uso do ncurses
     start_color(); // inicia as cores
@@ -112,37 +106,28 @@
         case 10: // No caso de ENTER
             
             // abre o FIFO do servidor para escrita
-            s_fifo_fd = open(SERVER_FIFO_P, O_WRONLY);
-            if(s_fifo_fd == -1) {
-                //fprintf(stderr, "\nO servidor nao esta a correr\n");
+            inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
+            if(inter_fifo_fd == -1) {
                 unlink(c_fifo_fname);
                 exit(EXIT_FAILURE);
             }
-            //fprintf(stderr, "\nFIFO do servidor aberto WRITE / BLOCKING");
 
             // abre o FIFO do cliente para escrita e leitura
             c_fifo_fd = open(c_fifo_fname, O_RDWR);
             if(c_fifo_fd == -1) {
-                //perror("\nErro ao abrir o FIFO do cliente");
-                close(s_fifo_fd);
+                close(inter_fifo_fd);
                 unlink(c_fifo_fname);
                 exit(EXIT_FAILURE);
             }
-            //fprintf(stderr, "\nFIFO do cliente aberto para READ (+WRITE)/ bloqueante");
 
             // linha selecionada e posta na struct request
             req.nr_linha = t->l_atual - 1;
 
             // envia a struct request para o server        
-            write(s_fifo_fd, &req, sizeof(req));
-            //printf("\nEnviei %d bytes ... linha: %d", w, req.nr_linha);
+            write(inter_fifo_fd, &req, sizeof(req));
+
             // le a resposta do servidor
             read(c_fifo_fd, &ctrl, sizeof(ctrl));
-            // if ( r == sizeof(ctrl))
-            //     printf("\nPermissao: %d \nFlag: %s", ctrl.perm, ctrl.np_name);
-            // else
-            //     printf("\nSem resposta ou resposta incompreensivel" 
-            //            "\nRecebi %d bytes", r);
 
             if(ctrl.perm == 1)
             {
@@ -275,7 +260,7 @@
                         }
                     }
                     // envia a struct request para o server (para me retirar da tabela de editores)      
-                    write(s_fifo_fd, &req, sizeof(req));
+                    write(inter_fifo_fd, &req, sizeof(req));
 
             } // fim da permissao
 
@@ -286,7 +271,7 @@
             break;
     }
     close(c_fifo_fd);
-    close(s_fifo_fd);
+    close(inter_fifo_fd);
     unlink(c_fifo_fname);
     wrefresh(janela);
     endwin(); // Encerra o ncurses
@@ -295,19 +280,25 @@
 
 int main(int argc, char **argv)
 {
-    char val_fifo_fname[20];
+
+    editor t;
+    user u;
+    server s;
+    WINDOW *janela;
+    
+    char val_fifo_fname[20], inter_fifo_fname[20];
     valida val;
-    int val_fifo_fd, res, s_fifo_fd, r, w;
+    int val_fifo_fd, res, s_fifo_fd, r, w, inter_fifo_fd;
 
     // Verificar se o NP Servidor existe
     if(access(SERVER_FIFO_P, F_OK) != 0) {
-        fprintf(stderr, "\nNão existe servidor!\n");
+        fprintf(stderr, "\nServidor não está iniciado...!\n");
         exit(EXIT_FAILURE);
     }
     // abre o np do servidor
     s_fifo_fd = open(SERVER_FIFO_P, O_WRONLY);
     if(s_fifo_fd == -1) {
-        fprintf(stderr, "\nO pipe não abriu!\n");
+        fprintf(stderr, "\nO pipe principal do server não abriu!\n");
         exit(EXIT_FAILURE);
     }
 
@@ -331,11 +322,19 @@ int main(int argc, char **argv)
        exit(EXIT_FAILURE);
     }
 
-    // preenche o nome do user 
-	printf("\nInsira o nome de utilizador: ");
-	scanf(" %7[^\n]", val.nome);
+    getOption_cli(argc, argv, &u);
+    
+    if(strlen(u.nome) == 0)
+    {
+        // preenche o nome do user 
+    	printf("\nInsira o nome de utilizador: ");
+	    scanf(" %7[^\n]", val.nome);
+    }
+    else
+        strcpy(val.nome, u.nome);
 
     val.pid_user = getpid();
+
     // manda a informacao ao servidor
     // para ser validada
     w = write(s_fifo_fd, &val, sizeof(val));
@@ -354,14 +353,20 @@ int main(int argc, char **argv)
     // se o utiizador for cliente
     if(val.ver == 1)
     {
-        editor t;
-        user u;
-        server s;
-        WINDOW *janela;
+        strcpy(inter_fifo_fname, val.np_name);
+        inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
+
+        if(inter_fifo_fd == -1)
+        {
+            fprintf(stderr,"\n O pipe val nao abriu\n");
+            close(s_fifo_fd);
+            exit(EXIT_FAILURE);
+        }
+
         inicia_vars(&t, &u, &s);
         char tab[t.nlinhas][t.ncolunas];
         strcpy(u.nome, val.nome);
-        criar_editor(janela, &t, tab, s_fifo_fd);
+        criar_editor(janela, &t, tab, inter_fifo_fname);
     }
     else if (val.ver == 0)
         fprintf(stderr,"\n '%s' nao consta na base de dados\n", val.nome);

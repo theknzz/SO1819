@@ -25,9 +25,9 @@
 
 // comunicação
 #define SERVER_FIFO_P "sss"
-#define NR_NP 2
 #define CLIENT_FIFO "ccc%d"
 #define VAL_FIFO "vvv%d"
+#define INTER_FIFO "sss%d"
 
 typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
@@ -53,6 +53,7 @@ typedef struct Valida {
     pid_t pid_user;
     int ver;
     char nome[8];
+    char np_name[20];
 } valida;
 
 typedef struct Request {
@@ -62,7 +63,6 @@ typedef struct Request {
 
 typedef struct Controlo {
     int perm;
-    char np_name[10];
 } controlo;
 
 #endif

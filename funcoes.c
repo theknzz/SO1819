@@ -11,7 +11,6 @@ void inicia_vars(editor *t, user *u, server *s)
 		// caso existão o valor delas é passado a inteiro pela funcao 'atoi()' e depois passado à estrutura
 
 
-
 		// editor
 
 		if (getenv("MEDIT_MAXLINES") != NULL) 
@@ -59,6 +58,7 @@ void inicia_vars(editor *t, user *u, server *s)
 		if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != TIME_OUT)
 		{
 			printf("\nErro na inicialização das variáveis ambiente\n");
+			exit(EXIT_FAILURE);
 		}
 } 
 
@@ -68,13 +68,13 @@ void inicia_vars(editor *t, user *u, server *s)
 		
 		char user[8];
 
-		if(strlen(s->fich_nome) == 0)
+		//if(strlen(s->fich_nome) == 0)
 			strcpy(s->fich_nome, "medit.db");
 
 		FILE  *f = fopen(s->fich_nome,"r");
 		if(f == NULL)
-		{
-			printf("\nErro ao abrir o ficheiro '%s'\n", s->fich_nome); // se a base de dados recebida nao existir ou houver algum problema na sua abertura
+		{ 
+			printf("\n Erro ao abrir a base de dados [%s]...n", s->fich_nome); // se a base de dados recebida nao existir ou houver algum problema na sua abertura
 			return 0;
 		}
 
@@ -107,9 +107,41 @@ void inicia_vars(editor *t, user *u, server *s)
 		}
 
 
-// Recebe opcao do servidor
 
-	void getOption(int argc, char **argv, editor *t, user *u, server *s) {
+	// Recebe opcao do utilizador
+	void getOption_cli(int argc, char **argv, user *u) {		
+		int c;
+		while(1) {
+
+				int option_index = 0;
+				c = getopt(argc, argv, "u:");
+				
+				if(c==-1)
+					break;
+
+				if(optind < argc)
+				{
+					fprintf(stderr, "Erro: Comando mal executado...\n", argv[optind++]);
+					exit(EXIT_FAILURE);
+				}
+
+				switch(c)
+				{
+					case 'u':
+						// FUNCAO QUE VERIFICA SE ESTE NOME JÁ FOI INICIADO?
+						if(strlen(optarg) != 0)
+							strcpy(u->nome, optarg);
+					break;
+
+					default:
+						break;
+				}
+				break;
+		}
+	}
+
+	// Recebe opcao do servidor
+	void getOption_ser(int argc, char **argv, editor *t, user *u, server *s) {
 
 		int c;
 
@@ -207,15 +239,15 @@ void inicia_vars(editor *t, user *u, server *s)
 				case 'p':
 					// strcpy(s->nome_pipe_p, SERVER_FIFO_P);
 					// sprintf(SERVER_FIFO_P, SERVER_FIFO_P, s->nome_pipe_p);
-					printf("O novo nome do pipe principal é : %s\n", s->nome_pipe_p);
+					// printf("O novo nome do pipe principal é : %s\n", s->nome_pipe_p);
 					break;
 
 				case 'n':
 					printf("O numero de NPs agora é %d\n", atoi(optarg));
 					break;
 				case 'f':
-					strcpy(s->fich_nome, optarg);
-					printf("Base de dados: %s", s->fich_nome);
+					//strcpy(s->fich_nome, optarg);
+					//printf("Base de dados: %s", s->fich_nome);
 					break;
 				case '?':
 					printf("\nConsulte -help para listar todos os comandos possiveis.\n");
