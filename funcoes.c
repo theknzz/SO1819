@@ -10,14 +10,14 @@ void inicia_vars(editor *t, user *u, server *s)
 		// Se as variaveis ambiente não existirem são iniciadas com os valores predefinidos no enunciado
 		// caso existão o valor delas é passado a inteiro pela funcao 'atoi()' e depois passado à estrutura
 
+		// base de dados por omissão
+		strcpy(s->fich_nome, "medit.db");
 
 		// editor
-
 		if (getenv("MEDIT_MAXLINES") != NULL) 
 		{
 			t->nlinhas = atoi(getenv("MEDIT_MAXLINES"));
 		}
-
 		else
 		{
 			t->nlinhas = MAXLINES; 
@@ -27,34 +27,28 @@ void inicia_vars(editor *t, user *u, server *s)
 		{
 			t->ncolunas = atoi(getenv("MEDIT_MAXCOLUMNS"));
 		}
-
 		else
 		{
 			t->ncolunas = MAXCOLUMNS;
 		}
 
 		// user
-
 		if (getenv("MEDIT_TIMEOUT") != NULL)
 		{
 			u->tempo_linha = atoi(getenv("MEDIT_TIMEOUT"));
 		}
-
 		else
 			u->tempo_linha = TIME_OUT;
 
 		// server
-
 		if (getenv("MEDIT_MAXUSERS") != NULL)
 		{
 			s->n_utilizadores_max = atoi(getenv("MEDIT_MAXUSERS"));
 		}
-
 		else
 			s->n_utilizadores_max = MAXUSERS;
 
 		// validacao
-
 		if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != TIME_OUT)
 		{
 			printf("\nErro na inicialização das variáveis ambiente\n");
@@ -68,7 +62,7 @@ void inicia_vars(editor *t, user *u, server *s)
 		
 		char user[8];
 
-		//if(strlen(s->fich_nome) == 0)
+		if(strlen(s->fich_nome) == 0)
 			strcpy(s->fich_nome, "medit.db");
 
 		FILE  *f = fopen(s->fich_nome,"r");
@@ -100,6 +94,7 @@ void inicia_vars(editor *t, user *u, server *s)
 			printf("\n\n\n");
 			printf("Número de linhas: %d\n", t.nlinhas);
 			printf("Número de colunas: %d\n", t.ncolunas);
+
 			strcpy(s.fich_nome, "debbuing here...");
 			printf("Nome da base de dados: %s\n", s.fich_nome);
 			//printf("Número de named pipes a utilizar: %s\n", s.n_named_pipes);
@@ -246,8 +241,8 @@ void inicia_vars(editor *t, user *u, server *s)
 					printf("O numero de NPs agora é %d\n", atoi(optarg));
 					break;
 				case 'f':
-					//strcpy(s->fich_nome, optarg);
-					//printf("Base de dados: %s", s->fich_nome);
+					strcpy(s->fich_nome, optarg);
+					printf("\nBase de dados: %s\n", s->fich_nome);
 					break;
 				case '?':
 					printf("\nConsulte -help para listar todos os comandos possiveis.\n");
