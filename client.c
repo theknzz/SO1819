@@ -349,8 +349,6 @@ int main(int argc, char **argv)
 
     close(val_fifo_fd);
     unlink(val_fifo_fname);
-    
-    // USER PASSA A SER UM CLIENTE
 
     // se o utiizador for cliente
     if(val.ver == 1)

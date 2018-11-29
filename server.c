@@ -22,7 +22,7 @@ int main( int argc, char **argv) {
 	int pos = 0;
 
 	// inicia variaveis
-	inicia_vars(&t, &u, &s);
+	// inicia_vars(&t, &u, &s);
 	// comandos adicionais do servidor
 	getOption_ser(argc, argv, &t, &u, &s);
 
