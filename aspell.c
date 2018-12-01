@@ -10,7 +10,6 @@
 int main(int argc, char *argv[])
 {
     char correta[200], atual[200], lixo[200];
-    int fd_ser, fd_cli, w, r;
     int ida[2];
     int volta[2];
     pid_t processo;
