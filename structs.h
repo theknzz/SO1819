@@ -1,21 +1,14 @@
-#ifndef STRUCTS
-#define STRUCTS
+#ifndef __STRUCTS__
+#define __STRUCTS__
 
 // libs
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ncurses.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <ctype.h>
 #include <getopt.h>
-#include <curses.h>
+#include <sys/stat.h> 
 #include <fcntl.h>
-#include <limits.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <ctype.h>
 
 // defines
 #define MAXLINES 15
@@ -29,13 +22,15 @@
 #define VAL_FIFO "vvv%d"
 #define INTER_FIFO "sss%d"
 
+int SAIR;
+
 typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
     char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
 } server;
 
 typedef struct User {
-    char nome[8];
+    char nome[9];
     int tempo_linha, linhas_editadas, linha_atual;
 } user;
 
@@ -46,23 +41,31 @@ typedef struct Avisos {
 
 typedef struct Editor {
     int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras;
+    char tab[MAXLINES][MAXCOLUMNS];
 } editor;
 
 typedef struct Valida {
     //char file[10];
     pid_t pid_user;
     int ver;
-    char nome[8];
+    char nome[9];
     char np_name[20];
 } valida;
 
-typedef struct Request {
+struct Request {
     pid_t pid_cliente;
-    int nr_linha;    
-} request;
+    int nr_linha;
+    char texto[MAXCOLUMNS];
+};
 
-typedef struct Controlo {
-    int perm;
-} controlo;
+struct Controlo {
+    int perm; // permissao para editar linha
+    int sair; // servidor vai fechar? 
+};
+
+typedef struct Comunica {
+    struct Request request;
+    struct Controlo controlo;
+} comunica;
 
 #endif
