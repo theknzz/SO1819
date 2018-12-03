@@ -16,6 +16,8 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
 
     // preenche o id do request
     com.request.pid_cliente = getpid();
+    // Flag que controla a validação no aspell
+    com.request.aspell = 0;
     sprintf(c_fifo_fname, CLIENT_FIFO, com.request.pid_cliente);
 
     // cria o pipe
@@ -42,7 +44,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
     }
 
     janela = newwin(t->nlinhas + 2, t->ncolunas + 3, 2, 3); //Criação da janela (linhas, colunas, posiçãoy no stdscr, posiçãox no stdscr)
-    erros = newwin(15, 20, 2, t->ncolunas + 5);
+    erros = newwin(15, 30, 2, t->ncolunas + 10);
 
     box(janela, '\0', ACS_HLINE); //Criação do border (WINDOW, tipo de border, tipo de border)
 
@@ -118,10 +120,6 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                 wmove(janela, t->l_atual, t->c_atual);
                 break;
             }
-
-            //Permite aceder à tabela de editores
-            com.request.aspell = 0;
-
             // abre o FIFO do cliente para escrita e leitura
             c_fifo_fd = open(c_fifo_fname, O_RDWR);
             if (c_fifo_fd == -1)
@@ -314,6 +312,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                             if (com.request.texto[i] == '&')
                             {
                                 wprintw(erros, "A palavra %d na linha %d esta errada! ", j + 1, t->l_atual - 1);
+                                wrefresh(erros);
                                 tecla2 = 0;
                                 j++;
                             }
@@ -326,8 +325,8 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                             {
                                 tab[t->l_atual - 1][i] = aux[i];
                             }
+                            break;
                         }
-                        break;
                     }
                 }
                 // Verificar se o NP Servidor existe

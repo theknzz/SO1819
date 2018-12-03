@@ -125,7 +125,7 @@ void getOption_cli(int argc, char **argv, user *u)
 void termina1()
 {
 	char inter_fifo_fname[20];
-	printf("\nFUI MORTO!\n");
+	
 	for (int i = 0; i < MAXUSERS; i++)
 	{
 		sprintf(inter_fifo_fname, INTER_FIFO, i);
@@ -465,7 +465,7 @@ void *serv_cli(void *dados)
 
 			c_fifo_fd = open(c_fifo_fname, O_WRONLY);
 			if (c_fifo_fd == -1)
-				perror("\nErro no open - Ninguem quis a resposta");
+				perror("\nErro no open - Ninguem quis a resposta da tabela");
 			else
 			{
 				fprintf(stderr, "\nFIFO cliente aberto para WRITE");
@@ -544,7 +544,6 @@ void *serv_cli(void *dados)
 				strcpy(total, com.request.texto);
 				write(ida[1], total, sizeof(total));
 
-				//read(volta[0], total, sizeof(total) - 1);
 				r = read(volta[0], total, sizeof(total) - 1);
 
 				if (r >= 0)
@@ -564,7 +563,7 @@ void *serv_cli(void *dados)
 
 				c_fifo_fd = open(c_fifo_fname, O_WRONLY);
 				if (c_fifo_fd == -1)
-					perror("\nErro no open - Ninguem quis a resposta");
+					perror("\nErro no open - Ninguem quis a resposta do aspell");
 				else
 				{
 					fprintf(stderr, "\nFIFO cliente aberto para WRITE");
