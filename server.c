@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
 	// threads
 	pthread_t tarefa[2];
-	
+
 	// verfica se já existe servidor
 	if (access(SERVER_FIFO_P, F_OK) == 0)
 	{
@@ -29,6 +29,9 @@ int main(int argc, char **argv) {
 		perror("\nmkfifo do FIFO do servidor deu erro");
 		exit(EXIT_FAILURE);
 	}
+
+	// Trata do sinal SIGUSR1
+	signal(SIGUSR1, termina1);
 
 	SAIR = 0;	
 	pthread_create(&tarefa[0], NULL, verificaCliente, &val);
@@ -49,5 +52,4 @@ int main(int argc, char **argv) {
 	unlink(SERVER_FIFO_P);
 
 	exit(EXIT_SUCCESS);
-
 }

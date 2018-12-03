@@ -7,6 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <pthread.h>
+#include <sys/types.h>
+#include <signal.h>
 #include <sys/stat.h> 
 #include <fcntl.h>
 
@@ -54,8 +57,8 @@ typedef struct Valida {
 
 struct Request {
     pid_t pid_cliente;
-    int nr_linha;
-    char texto[MAXCOLUMNS];
+    int nr_linha, aspell;
+    char texto[1000];
 };
 
 struct Controlo {

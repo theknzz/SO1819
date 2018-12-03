@@ -22,5 +22,6 @@ void mostra_def(editor t, server s);
 void *verificaCliente(void *dados);
 void *serv_cli(void *dados);
 void commandline();
+void termina1();
 
 #endif
