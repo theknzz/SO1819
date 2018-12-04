@@ -606,13 +606,11 @@ void dicionario(comunica *original)
 		close(volta[1]);
 		close(volta[0]);
 
-		//executa o aspell
-		fprintf(stderr, "\nFILHO DO DICIONARIO!!!\n");
-		/*char *argv[] = {"/usr/bin/aspell", "pipe", "-l", "pt_PT", 0}; //modo de funcionamento do aspell
-		execv(argv[0], argv);*/
+		//fprintf(stderr, "\nFILHO DO DICIONARIO!!!\n");
 		
+		//executa o aspell
 		execlp("aspell", "aspell", "-a", "-l", "pt_PT", NULL);
-		fprintf(stderr, "Executei o aspell!!!");
+		//fprintf(stderr, "Executei o aspell!!!");
 	}
 
 	else if (processo < 0)
@@ -622,10 +620,9 @@ void dicionario(comunica *original)
 	}
 	else
 	{ // se for pai
-		fprintf(stderr, "\nPAI DO DICIONARIO!!!\n");
-		//wait(NULL);
+		//fprintf(stderr, "\nPAI DO DICIONARIO!!!\n");
 		r = read(volta[0], &total, sizeof(total));
-		fprintf(stderr, "\nFilhos é só dor de cabeça...\n");
+		//fprintf(stderr, "\nFilhos é só dor de cabeça...\n");
 
 		if (r >= 0)
 		{
@@ -642,7 +639,8 @@ void dicionario(comunica *original)
 		{
 			original->controlo.texto_certo[i] = ' ';
 		}
-		fprintf(stderr, "\nCheguei ao ciclo!!\n");
+		
+		//fprintf(stderr, "\nCheguei ao ciclo!!\n");
 		//Ciclo que divide as palavras
 		for (i = 0, aux = (char *)strtok(frase, " "); aux != NULL; aux = (char *)strtok(NULL, " "))
 		{
