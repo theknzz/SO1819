@@ -7,9 +7,6 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <signal.h>
 #include <sys/stat.h> 
 #include <fcntl.h>
 
@@ -25,6 +22,7 @@
 #define VAL_FIFO "vvv%d"
 #define INTER_FIFO "sss%d"
 
+// vars
 int SAIR;
 
 typedef struct Server {
@@ -57,8 +55,8 @@ typedef struct Valida {
 
 struct Request {
     pid_t pid_cliente;
-    int nr_linha, aspell;
-    char texto[1000];
+    int nr_linha;
+    char texto[MAXCOLUMNS];
 };
 
 struct Controlo {

@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 	int i;
 
 	char str[20];
-
+	banner();
 	// inicia variaveis
 	inicia_vars(&t, &u, &s);
 
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
 
 	// threads
 	pthread_t tarefa[2];
-
+	
 	// verfica se já existe servidor
 	if (access(SERVER_FIFO_P, F_OK) == 0)
 	{
@@ -30,17 +30,14 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	// Trata do sinal SIGUSR1
-	signal(SIGUSR1, termina1);
-
 	SAIR = 0;	
 	pthread_create(&tarefa[0], NULL, verificaCliente, &val);
 	pthread_join(tarefa[0], NULL);
 
 	pthread_create(&tarefa[1], NULL, serv_cli, &com);
 
-	system("clear");
 	commandline();
+
 	//SAIR = 1;
 	pthread_join(tarefa[1], NULL);
 	close(s_fifo_fd);
@@ -52,4 +49,5 @@ int main(int argc, char **argv) {
 	unlink(SERVER_FIFO_P);
 
 	exit(EXIT_SUCCESS);
+
 }

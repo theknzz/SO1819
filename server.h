@@ -4,15 +4,14 @@
 #include "structs.h"
 
 #include <pthread.h>
-
 // vars
-editor t;
-user u;
-server s;
-
 int inter_fifo_fd, s_fifo_fd, pos;
 comunica com;
 valida val;
+
+editor t;
+user u;
+server s;
 
 // funcoes
 void inicia_vars(editor *t, user *u, server *s);
@@ -22,6 +21,6 @@ void mostra_def(editor t, server s);
 void *verificaCliente(void *dados);
 void *serv_cli(void *dados);
 void commandline();
-void termina1();
+void banner();
 
 #endif
