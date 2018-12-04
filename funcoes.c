@@ -168,13 +168,13 @@ int verifica_user(char *nome, server *s)
 // ------------------------------------------------------------------------------------------------------
 // Mostra defenicoes
 
-void mostra_def(editor t, server s)
+void mostra_def(editor *t, server *s)
 {
-	printf("\nNumero de linhas: %d\n", t.nlinhas);
-	printf("Numero de colunas: %d\n", t.ncolunas);
-	printf("Nome da base de dados: %s\n", s.fich_nome);
-	printf("Numero de named pipes a utilizar: %d\n", s.n_named_pipes);
-	printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
+	printf("\nNumero de linhas: %d\n", t->nlinhas);
+	printf("Numero de colunas: %d\n", t->ncolunas);
+	printf("Nome da base de dados: %s\n", s->fich_nome);
+	printf("Numero de named pipes a utilizar: %d\n", s->n_named_pipes);
+	printf("Nome do named pipe principal: %s\n", s->nome_pipe_p);
 }
 
 // Recebe opcao do servidor
@@ -229,7 +229,7 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 			break;
 
 		case 'd':
-			mostra_def(*t, *s);
+			mostra_def(&t, &s);
 			break;
 
 		case 'c':
@@ -298,12 +298,12 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 // ------------------------------------------------------------------------------------------------------
 void *verificaCliente(void *dados)
 {
-
+	valida val;
 	int inter_pipes[MAXUSERS];
 	int i;
 	for (i = 0; i < MAXUSERS; i++)
 		inter_pipes[i] = 0;
-
+	server *ser = (server*) dados;
 	int s_fifo_fd, val_fifo_fd, inter_fifo_fd;
 	char val_fifo_fname[20], inter_fifo_fname[20], inter_fifo[20];
 
@@ -338,7 +338,7 @@ void *verificaCliente(void *dados)
 
 	// verifica se o username existe na base de dados
 	// verifica_user > return 1 se existir
-	val.ver = verifica_user(val.nome, &s);
+	val.ver = verifica_user(val.nome, ser);
 
 	if (val.ver == 1)
 	{
@@ -463,8 +463,10 @@ void *serv_cli(void *dados)
 				}
 			}
 			else if(com.request.aspell == 1){
+				//Chama a função de verificação
 				dicionario(&com);
 			}
+
 			// OBTEM O NOME DO FIFO PARA ONDE VAI RESPONDER
 			sprintf(c_fifo_fname, CLIENT_FIFO, com.request.pid_cliente);
 
@@ -500,7 +502,7 @@ void banner()
 	printf("`8888Y' Y88888P 88   YD    YP    Y88888P 88   YD  \n");
 }
 // ------------------------------------------------------------------------------------------------------
-void commandline()
+void commandline(editor* edit, server* ser)
 {
 
 	char comando[50];
@@ -517,7 +519,7 @@ void commandline()
 
 		if (!strcmp(cmd, "settings"))
 		{
-			mostra_def(t, s);
+			mostra_def(&edit, &ser);
 		}
 		else if (!strcmp(cmd, "load"))
 		{ // tem argumento
@@ -569,7 +571,7 @@ void commandline()
 void dicionario(comunica *original)
 {
 	int ida[2], volta[2], r, i;
-	char total[400], *aux;
+	char total[400], frase[MAXCOLUMNS], *aux;
 	pid_t processo;
 
 	if (pipe(ida) < 0)
@@ -634,7 +636,7 @@ void dicionario(comunica *original)
 			printf("Erro na leitura do inicio do aspell\n");
 		}
 
-		strcpy(total, original->request.texto);
+		strcpy(frase, original->request.texto);
 
 		for (i = 0; i < MAXCOLUMNS; i++)
 		{
@@ -642,11 +644,11 @@ void dicionario(comunica *original)
 		}
 		fprintf(stderr, "\nCheguei ao ciclo!!\n");
 		//Ciclo que divide as palavras
-		for (i = 0, aux = (char *)strtok(total, " "); aux != NULL; aux = (char *)strtok(NULL, " "))
+		for (i = 0, aux = (char *)strtok(frase, " "); aux != NULL; aux = (char *)strtok(NULL, " "))
 		{
 			fprintf(stderr, "\nString inicial: %s", aux);
 			write(ida[1], &aux, strlen(aux));
-			
+			//Validação do enter
 			write(ida[1], "\n", sizeof(char));
 
 			r = read(volta[0], &total, strlen(total) - 1);

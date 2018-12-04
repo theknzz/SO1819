@@ -260,28 +260,33 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                         c_fifo_fd = open(c_fifo_fname, O_RDWR);
                         if (c_fifo_fd == -1)
                         {
+                            wprintw(erros, "\nerro ao abrir o fifo do cliente");
+                            wrefresh(erros);
                             unlink(c_fifo_fname);
-                            printf("\nerro ao abrir o fifo do cliente");
+                            sleep(2);
+                            exit(EXIT_FAILURE);
                         }
 
                         // abre o FIFO do servidor para escrita
                         inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
                         if (inter_fifo_fd == -1)
                         {
-                            printf("\nerro ao abrir o pipe de intecao\n");
+                            wprintw(erros, "\nerro ao abrir o pipe de interacao\n");
+                            wrefresh(erros);
+                            sleep(2);
                             unlink(c_fifo_fname);
                             exit(EXIT_FAILURE);
                         }
-                        //linha selecionada e posta na struct request
-                        com.request.nr_linha = t->l_atual - 1;
 
                         //envia a struct request para o server
                         write(inter_fifo_fd, &com.request, sizeof(com.request));
-                        wprintw(erros, "Escrevo bem e morro!!!");
-                        wrefresh(erros);
+                        /*wprintw(erros, "Escrevo bem!!!");
+                        wrefresh(erros);*/
 
                         //le a resposta do servidor
                         read(c_fifo_fd, &com.controlo, sizeof(com.controlo));
+                        /*wprintw(erros,"Li isto bem!!! %s", com.controlo.texto_certo);
+                        wrefresh(erros);*/
 
                         j = 0;
                         i = 0;

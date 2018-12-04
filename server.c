@@ -1,10 +1,14 @@
 #include "server.h"
 #include "structs.h"
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
 
 	char inter_fifo_fname[20];
 	int i;
+	editor t;
+	user u;
+	server s;
 
 	char str[20];
 	banner();
@@ -16,7 +20,7 @@ int main(int argc, char **argv) {
 
 	// threads
 	pthread_t tarefa[2];
-	
+
 	signal(SIGUSR1, termina1);
 
 	// verfica se já existe servidor
@@ -27,29 +31,29 @@ int main(int argc, char **argv) {
 	}
 
 	// cria o npipe do servidor
-	if(mkfifo(SERVER_FIFO_P, 0600) == -1){
+	if (mkfifo(SERVER_FIFO_P, 0600) == -1)
+	{
 		perror("\nmkfifo do FIFO do servidor deu erro");
 		exit(EXIT_FAILURE);
 	}
 
-	SAIR = 0;	
-	pthread_create(&tarefa[0], NULL, verificaCliente, &val);
+	SAIR = 0;
+	pthread_create(&tarefa[0], NULL, verificaCliente, &s);
 	pthread_join(tarefa[0], NULL);
 
 	pthread_create(&tarefa[1], NULL, serv_cli, NULL);
 
-	commandline();
+	commandline(&t, &s);
 
 	//SAIR = 1;
 	pthread_join(tarefa[1], NULL);
-	close(s_fifo_fd);
+	/*close(s_fifo_fd);
 	close(inter_fifo_fd);
 	for(i = 0; i < MAXUSERS; i++)	{
 		sprintf(inter_fifo_fname, INTER_FIFO, i);
 		unlink(inter_fifo_fname);
 	}
-	unlink(SERVER_FIFO_P);
+	unlink(SERVER_FIFO_P);*/
 
 	exit(EXIT_SUCCESS);
-
 }
