@@ -17,6 +17,8 @@ int main(int argc, char **argv) {
 	// threads
 	pthread_t tarefa[2];
 	
+	signal(SIGUSR1, termina1);
+
 	// verfica se já existe servidor
 	if (access(SERVER_FIFO_P, F_OK) == 0)
 	{
@@ -34,7 +36,7 @@ int main(int argc, char **argv) {
 	pthread_create(&tarefa[0], NULL, verificaCliente, &val);
 	pthread_join(tarefa[0], NULL);
 
-	pthread_create(&tarefa[1], NULL, serv_cli, &com);
+	pthread_create(&tarefa[1], NULL, serv_cli, NULL);
 
 	commandline();
 

@@ -7,7 +7,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <getopt.h>
-#include <sys/stat.h> 
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
+#include <pthread.h>
 #include <fcntl.h>
 
 // defines
@@ -55,13 +59,14 @@ typedef struct Valida {
 
 struct Request {
     pid_t pid_cliente;
-    int nr_linha;
+    int nr_linha, aspell;
     char texto[MAXCOLUMNS];
 };
 
 struct Controlo {
     int perm; // permissao para editar linha
-    int sair; // servidor vai fechar? 
+    int sair; // servidor vai fechar?
+    char texto_certo[MAXCOLUMNS];
 };
 
 typedef struct Comunica {

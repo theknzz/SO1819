@@ -3,10 +3,8 @@
 
 #include "structs.h"
 
-#include <pthread.h>
 // vars
 int inter_fifo_fd, s_fifo_fd, pos;
-comunica com;
 valida val;
 
 editor t;
@@ -22,5 +20,7 @@ void *verificaCliente(void *dados);
 void *serv_cli(void *dados);
 void commandline();
 void banner();
+void dicionario(comunica *original);
+void termina1();
 
 #endif
