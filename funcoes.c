@@ -168,13 +168,13 @@ int verifica_user(char *nome, server *s)
 // ------------------------------------------------------------------------------------------------------
 // Mostra defenicoes
 
-void mostra_def(editor *t, server *s)
+void mostra_def(editor t, server s)
 {
-	printf("\nNumero de linhas: %d\n", t->nlinhas);
-	printf("Numero de colunas: %d\n", t->ncolunas);
-	printf("Nome da base de dados: %s\n", s->fich_nome);
-	printf("Numero de named pipes a utilizar: %d\n", s->n_named_pipes);
-	printf("Nome do named pipe principal: %s\n", s->nome_pipe_p);
+	printf("\nNumero de linhas: %d\n", t.nlinhas);
+	printf("Numero de colunas: %d\n", t.ncolunas);
+	printf("Nome da base de dados: %s\n", s.fich_nome);
+	printf("Numero de named pipes a utilizar: %d\n", s.n_named_pipes);
+	printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
 }
 
 // Recebe opcao do servidor
@@ -229,7 +229,7 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 			break;
 
 		case 'd':
-			mostra_def(&t, &s);
+			mostra_def(*t, *s);
 			break;
 
 		case 'c':
@@ -303,7 +303,7 @@ void *verificaCliente(void *dados)
 	int i;
 	for (i = 0; i < MAXUSERS; i++)
 		inter_pipes[i] = 0;
-	server *ser = (server*) dados;
+	server *ser = (server *)dados;
 	int s_fifo_fd, val_fifo_fd, inter_fifo_fd;
 	char val_fifo_fname[20], inter_fifo_fname[20], inter_fifo[20];
 
@@ -462,7 +462,8 @@ void *serv_cli(void *dados)
 					fflush(stdout);
 				}
 			}
-			else if(com.request.aspell == 1){
+			else if (com.request.aspell == 1)
+			{
 				//Chama a função de verificação
 				dicionario(&com);
 			}
@@ -502,7 +503,7 @@ void banner()
 	printf("`8888Y' Y88888P 88   YD    YP    Y88888P 88   YD  \n");
 }
 // ------------------------------------------------------------------------------------------------------
-void commandline(editor* edit, server* ser)
+void commandline(editor *edit, server *ser)
 {
 
 	char comando[50];
@@ -519,7 +520,7 @@ void commandline(editor* edit, server* ser)
 
 		if (!strcmp(cmd, "settings"))
 		{
-			mostra_def(&edit, &ser);
+			mostra_def(*edit, *ser);
 		}
 		else if (!strcmp(cmd, "load"))
 		{ // tem argumento
@@ -570,8 +571,8 @@ void commandline(editor* edit, server* ser)
 
 void dicionario(comunica *original)
 {
-	int ida[2], volta[2], r, i;
-	char total[400], frase[MAXCOLUMNS], *aux;
+	int ida[2], volta[2], r, i, conta_enter = 0;
+	char total[400], frase[MAXCOLUMNS + 1], *aux, pos1;
 	pid_t processo;
 
 	if (pipe(ida) < 0)
@@ -607,10 +608,11 @@ void dicionario(comunica *original)
 		close(volta[0]);
 
 		//fprintf(stderr, "\nFILHO DO DICIONARIO!!!\n");
-		
+
 		//executa o aspell
 		execlp("aspell", "aspell", "-a", "-l", "pt_PT", NULL);
-		//fprintf(stderr, "Executei o aspell!!!");
+
+		exit(EXIT_SUCCESS);
 	}
 
 	else if (processo < 0)
@@ -621,56 +623,76 @@ void dicionario(comunica *original)
 	else
 	{ // se for pai
 		//fprintf(stderr, "\nPAI DO DICIONARIO!!!\n");
-		r = read(volta[0], &total, sizeof(total));
+		r = read(volta[0], &total, sizeof(char) * 400);
 		//fprintf(stderr, "\nFilhos é só dor de cabeça...\n");
 
 		if (r >= 0)
 		{
-			total[r] = 0;
+			total[r] = '\0';
 		}
 		else
 		{
-			printf("Erro na leitura do inicio do aspell\n");
+			fprintf(stderr, "Erro na leitura do inicio do aspell\n");
 		}
-
-		strcpy(frase, original->request.texto);
 
 		for (i = 0; i < MAXCOLUMNS; i++)
 		{
 			original->controlo.texto_certo[i] = ' ';
 		}
-		
-		//fprintf(stderr, "\nCheguei ao ciclo!!\n");
+
+		strcpy(frase, original->request.texto);
+
+		fprintf(stderr, "\nString inicial: '%s'\n", original->request.texto);
+		i = 0;
 		//Ciclo que divide as palavras
-		for (i = 0, aux = (char *)strtok(frase, " "); aux != NULL; aux = (char *)strtok(NULL, " "))
+		aux = (char *)strtok(frase, " ");
+		frase[MAXCOLUMNS] = '\0';
+
+		while (aux != NULL)
 		{
-			fprintf(stderr, "\nString inicial: %s", aux);
-			write(ida[1], &aux, strlen(aux));
+			strcpy(total, aux);
+			fprintf(stderr, "\nString depois do strtok: %s!!", total);
+			write(ida[1], &total, strlen(total));
+
 			//Validação do enter
 			write(ida[1], "\n", sizeof(char));
 
-			r = read(volta[0], &total, strlen(total) - 1);
+			r = read(volta[0], &total, sizeof(char) * 400);
 
-			fprintf(stderr, "\nOutput do aspell: %s", total);
+			pos1 = total[0];
 
-			if (r >= 0)
+			fprintf(stderr, "\nOutput do aspell: '%s'!!\n", total);
+
+			// Se TOTAL tive dois '\n' ENTAO recebi tudo OK!
+			//                         SENAO tenho de fazer mais READS!
+			if (r > 0)
 			{
-				total[r] = 0;
-				if (total[0] == '*')
+				if (total[r - 1] == '\n' && total[r] == '\n')
 				{
-					original->controlo.texto_certo[i] = '*';
-					i++;
+					total[r] = '\0';
 				}
-				else if (total[0] == '&')
+				else
 				{
-					original->controlo.texto_certo[i] = '&';
-					i++;
+					read(volta[0], &total, sizeof(char) * 400);
 				}
 			}
 			else
 			{
 				printf("Erro na leitura do output aspell\n");
 			}
+
+			if (pos1 == '*' || pos1 == '+')
+			{
+				original->controlo.texto_certo[i] = '*';
+				i++;
+			}
+			else if (pos1 == '&')
+			{
+				original->controlo.texto_certo[i] = '&';
+				i++;
+			}
+
+			aux = (char *)strtok(NULL, " ");
 		}
 	}
 }

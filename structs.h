@@ -60,7 +60,7 @@ typedef struct Valida {
 struct Request {
     pid_t pid_cliente;
     int nr_linha, aspell;
-    char texto[MAXCOLUMNS];
+    char texto[MAXCOLUMNS + 1];
 };
 
 struct Controlo {
