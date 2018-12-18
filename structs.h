@@ -66,7 +66,7 @@ struct Request {
 struct Controlo {
     int perm; // permissao para editar linha
     int sair; // servidor vai fechar?
-    char texto_certo[MAXCOLUMNS];
+    char texto_certo[MAXCOLUMNS + 1];
 };
 
 typedef struct Comunica {

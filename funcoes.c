@@ -624,11 +624,11 @@ void dicionario(comunica *original)
 	{ // se for pai
 		//fprintf(stderr, "\nPAI DO DICIONARIO!!!\n");
 		r = read(volta[0], &total, sizeof(char) * 400);
-		//fprintf(stderr, "\nFilhos é só dor de cabeça...\n");
 
 		if (r >= 0)
 		{
 			total[r] = '\0';
+			fprintf(stderr, "Mensagem inicial do aspell: '%s'", total);
 		}
 		else
 		{
@@ -639,6 +639,8 @@ void dicionario(comunica *original)
 		{
 			original->controlo.texto_certo[i] = ' ';
 		}
+
+		original->controlo.texto_certo[i] = '\0';
 
 		strcpy(frase, original->request.texto);
 
@@ -673,7 +675,7 @@ void dicionario(comunica *original)
 				}
 				else
 				{
-					read(volta[0], &total, sizeof(char) * 400);
+					r = read(volta[0], &total, sizeof(char) * 400);
 				}
 			}
 			else
@@ -686,7 +688,7 @@ void dicionario(comunica *original)
 				original->controlo.texto_certo[i] = '*';
 				i++;
 			}
-			else if (pos1 == '&')
+			else
 			{
 				original->controlo.texto_certo[i] = '&';
 				i++;
