@@ -671,7 +671,7 @@ void dicionario(comunica *original)
 			{
 				if (total[r - 1] == '\n' && total[r] == '\n')
 				{
-					total[r] = '\0';
+					total[r - 1] = '\0';
 				}
 				else
 				{

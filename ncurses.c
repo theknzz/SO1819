@@ -332,7 +332,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                             aux[i] = aux[i - 1];
                         }
                         aux[t->c_atual - 2] = tecla2;
-                        //t->n_palavras++;
+                        //t->n_letras++;
 
                         for (i = 0; i < t->ncolunas; i++)
                         {
