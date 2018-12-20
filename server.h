@@ -18,11 +18,13 @@ void *verificaCliente(void *dados);
 void serv_cli(server *s);
 void commandline(editor* t, server* s);
 void banner();
-void dicionario(comunica *original);
+void dicionario(char *original, char *correta);
 void termina1();
 void cria_np_interacao();
 void *employee(void *dados);
 void requisita(int *editores, comunica *com);
+int guarda_tabela(int linhas, int colunas, char *tab[linhas][colunas], char *nome_fich);
+int carrega_tabela(int linhas, int colunas, char *tab[linhas][colunas], char *nome_fich);
 
 
 #endif

@@ -4,7 +4,7 @@
 void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_fname[20])
 {
     WINDOW *erros;
-    int tecla, i = 0, j, coluna_ini = 2, tecla2 , w, r;
+    int tecla, i = 0, j, coluna_ini = 2, tecla2, w, r;
     char x, aux[t->ncolunas];
 
     int c_fifo_fd, inter_fifo_fd;
@@ -119,19 +119,13 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                 break;
             }
 
-            // abre o FIFO do cliente para escrita e leitura
-            c_fifo_fd = open(c_fifo_fname, O_RDWR);
-            if (c_fifo_fd == -1) {
-                unlink(c_fifo_fname);
-                printf("\nerro ao abrir o fifo do cliente");
-            }
-
             // abre o FIFO do servidor para escrita
             wprintw(erros, "pipe: %s", inter_fifo_fname);
             wrefresh(erros);
             wrefresh(janela);
             inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
-            if (inter_fifo_fd == -1) {
+            if (inter_fifo_fd == -1)
+            {
                 wprintw(erros, "\nerro ao abrir o pipe de intecao\n");
                 wrefresh(erros);
                 unlink(c_fifo_fname);
@@ -144,8 +138,19 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
             //envia a struct request para o server
             write(inter_fifo_fd, &com.request, sizeof(com.request));
 
+            // abre o FIFO do cliente para escrita e leitura
+            c_fifo_fd = open(c_fifo_fname, O_RDWR);
+            if (c_fifo_fd == -1)
+            {
+                wclear(erros);
+                unlink(c_fifo_fname);
+                wprintw(erros, "Erro ao abrir o fifo do cliente!");
+                exit(EXIT_FAILURE);
+            }
             //le a resposta do servidor
             read(c_fifo_fd, &com.controlo, sizeof(com.controlo));
+
+            close(c_fifo_fd);
 
             if (com.controlo.perm == 1 && com.controlo.sair == 0)
             {
@@ -161,9 +166,10 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                     aux[i] = tab[t->l_atual - 1][i];
                 }
 
+                tecla2 = 0;
+                
                 // Enquanto estiver no modo de edicao
                 // e nao quiser sair ...
-
                 while (tecla2 != 27 && tecla == 10 && com.controlo.sair == 0)
                 {
                     getyx(janela, t->l_atual, t->c_atual);
@@ -249,14 +255,48 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                         {
                             mvwprintw(janela, t->l_atual, i + 2, "%c", tab[t->l_atual - 1][i]);
                         }
-                        wmove(janela, t->l_atual, t->c_atual);
+                        wmove(janela, t->l_atual, 2);
                         break;
 
                     case 10:
                         //Proibe aceder à tabela de editores e funciona o aspell
                         com.request.aspell = 1;
                         //Escreve a linha na estrutura
+                        for (i = 0; i < strlen(com.request.texto); i++)
+                            com.request.texto[i] == ' ';
+
+                        com.request.texto[t->ncolunas] = '\0';
+                        aux[t->ncolunas] = '\0';
+
+                        /*wprintw(erros, "String: '%s'!", aux);
+                        wrefresh(erros);*/
+
+                        //Escreve a linha na estrutura
+                        for (i = 0; i < t->ncolunas; i++)
+                        {
+                            com.request.texto[i] = aux[i];
+                        }
+
+                        // abre o FIFO do servidor para escrita
+                        /*inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
+                        if (inter_fifo_fd == -1)
+                        {
+                            wprintw(erros, "\nerro ao abrir o pipe de interacao\n");
+                            wrefresh(erros);
+                            sleep(2);
+                            unlink(c_fifo_fname);
+                            exit(EXIT_FAILURE);
+                        }*/
                         strcpy(com.request.texto, aux);
+
+                        //envia a struct request para o server
+                        w = write(inter_fifo_fd, &com.request, sizeof(com.request));
+                        if (w == sizeof(com.request))
+                        {
+                            wprintw(erros, "\nescrevi %d bytes para %d", w, inter_fifo_fd);
+                            wrefresh(erros);
+                            wrefresh(janela);
+                        }
 
                         c_fifo_fd = open(c_fifo_fname, O_RDWR);
                         if (c_fifo_fd == -1)
@@ -264,36 +304,17 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                             wprintw(erros, "\nerro ao abrir o fifo do cliente");
                             wrefresh(erros);
                             unlink(c_fifo_fname);
-                            sleep(2);
                             exit(EXIT_FAILURE);
                         }
-
-                        // // abre o FIFO do servidor para escrita
-                        // inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
-                        // if (inter_fifo_fd == -1)
-                        // {
-                        //     wprintw(erros, "\nerro ao abrir o pipe de interacao\n");
-                        //     wrefresh(erros);
-                        //     sleep(2);
-                        //     unlink(c_fifo_fname);
-                        //     exit(EXIT_FAILURE);
-                        // }
-
-                        //envia a struct request para o server
-                        w = write(inter_fifo_fd, &com.request, sizeof(com.request));
-                        if(w==sizeof(com.request)) {
-                            wprintw(erros, "\nescrevi %d bytes para %d", w, inter_fifo_fd);
-                            wrefresh(erros);
-                            wrefresh(janela);
-                        }
-
                         //le a resposta do servidor
                         r = read(c_fifo_fd, &com.controlo, sizeof(com.controlo));
-                        if(r==sizeof(com.controlo)) {
+                        /*if (r == sizeof(com.controlo))
+                        {
                             wprintw(erros, "\nli %d bytes", r);
                             wrefresh(erros);
                             wrefresh(janela);
-                        }
+                        }*/
+                        close(c_fifo_fd);
 
                         j = 0;
                         i = 0;
@@ -351,7 +372,6 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                         break;
                     }
                 }
-
                 // Verificar se o NP Servidor existe
                 if (access(SERVER_FIFO_P, F_OK) != 0)
                 {
@@ -360,12 +380,12 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                     attroff(COLOR_PAIR(2));
                     wprintw(erros, "Servidor não está iniciado...! Prima ESC para sair...");
                     wrefresh(erros);
-                    wmove(janela, t->l_atual, t->c_atual);
+                    wmove(janela, t->l_atual, 2);
                     break;
                 }
                 com.request.aspell = 0;
+                
                 write(inter_fifo_fd, &com.request, sizeof(com.request));
-
             } // fim da permissao
             noecho();
             break;
