@@ -130,6 +130,7 @@ void termina1()
 		sprintf(inter_fifo_fname, INTER_FIFO, i);
 		unlink(inter_fifo_fname);
 	}
+
 	unlink(SERVER_FIFO_P);
 	exit(0);
 }
@@ -168,13 +169,13 @@ int verifica_user(char *nome, server *s)
 // ------------------------------------------------------------------------------------------------------
 // Mostra defenicoes
 
-void mostra_def(editor t, server s)
+void mostra_def(editor *t, server *s)
 {
-	printf("\nNumero de linhas: %d\n", t.nlinhas);
-	printf("Numero de colunas: %d\n", t.ncolunas);
-	printf("Nome da base de dados: %s\n", s.fich_nome);
-	printf("Numero de named pipes a utilizar: %d\n", s.n_named_pipes);
-	printf("Nome do named pipe principal: %s\n", s.nome_pipe_p);
+	printf("\nNumero de linhas: %d\n", t->nlinhas);
+	printf("Numero de colunas: %d\n", t->ncolunas);
+	printf("Nome da base de dados: %s\n", s->fich_nome);
+	printf("Numero de named pipes a utilizar: %d\n", s->n_named_pipes);
+	printf("Nome do named pipe principal: %s\n", s->nome_pipe_p);
 }
 
 // Recebe opcao do servidor
@@ -229,7 +230,7 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 			break;
 
 		case 'd':
-			mostra_def(*t, *s);
+			mostra_def(t, s);
 			break;
 
 		case 'c':
@@ -301,13 +302,15 @@ void *verificaCliente(void *dados)
 	valida val;
 	int inter_pipes[MAXUSERS];
 	int i;
-	for (i = 0; i < MAXUSERS; i++)
-		inter_pipes[i] = 0;
-	server *ser = (server *)dados;
-	int s_fifo_fd, val_fifo_fd, inter_fifo_fd;
-	char val_fifo_fname[20], inter_fifo_fname[20], inter_fifo[20];
 
-	int res, r, w, util = inter_pipes[0];
+	for (i = 0; i < MAXUSERS; i++){
+		inter_pipes[i] = 0;
+	}
+
+	server *ser = (server*) dados;
+	
+	int s_fifo_fd, val_fifo_fd, inter_fifo_fd, res, r, w, util;
+	char val_fifo_fname[20], inter_fifo_fname[20], inter_fifo[20];
 
 	// abre o npipe do servidor
 	s_fifo_fd = open(SERVER_FIFO_P, O_RDWR);
@@ -318,178 +321,261 @@ void *verificaCliente(void *dados)
 	}
 	//	fprintf(stderr, "\nFIFO do servidor aberto para READ (+WRITE) bloqueante\n");
 
-	//	printf("\nEstou preso  no read\n");
-	// le a informação relativa à validacao do utilizador
-	r = read(s_fifo_fd, &val, sizeof(val));
-	// if (r == sizeof(valida))
-	// 	fprintf(stderr, "\nRecebi %d bytes do user ...", r);
+	while(1) {
 
-	// preenche o nome do pipe (val) com quem vai falar
-	sprintf(val_fifo_fname, VAL_FIFO, val.pid_user);
+		// le a informação relativa à validacao do utilizador
+		r = read(s_fifo_fd, &val, sizeof(val));
 
-	// abre o npipe de validacao para WR
-	val_fifo_fd = open(val_fifo_fname, O_WRONLY);
-	if (val_fifo_fd == -1)
-	{
-		perror("\nErro ao abrir o FIFO de valicao");
-		close(s_fifo_fd);
-		exit(EXIT_FAILURE);
-	}
+		// if (r == sizeof(valida))
+		// 	fprintf(stderr, "\nRecebi %d bytes do user ...", r);
 
-	// verifica se o username existe na base de dados
-	// verifica_user > return 1 se existir
-	val.ver = verifica_user(val.nome, ser);
+		// preenche o nome do pipe (val) com quem vai falar
+		sprintf(val_fifo_fname, VAL_FIFO, val.pid_user);
 
-	if (val.ver == 1)
-	{
-		for (i = 1; i < MAXUSERS; i++)
+		// abre o npipe de validacao para WR
+		val_fifo_fd = open(val_fifo_fname, O_WRONLY);
+		if (val_fifo_fd == -1)
 		{
-			if (inter_pipes[i] < util)
-			{
-				util = inter_pipes[i];
-				pos = i;
-			}
+			perror("\nErro ao abrir o FIFO de valicao");
+			close(s_fifo_fd);
+			exit(EXIT_FAILURE);
 		}
-		inter_pipes[pos] += 1;
-		// pipe para onde o cliente passa a falar
-		sprintf(inter_fifo_fname, INTER_FIFO, pos);
 
-		for (i = 0; i < MAXUSERS; i++)
+		// verifica se o username existe na base de dados
+		// verifica_user > return 1 se existir
+		val.ver = verifica_user(val.nome, ser);
+
+		if (val.ver == 1)
 		{
-			sprintf(inter_fifo, INTER_FIFO, i);
-
-			if (mkfifo(inter_fifo, 0600) == -1)
+			util = inter_pipes[0];
+			for (i = 1; i < MAXUSERS; i++)
 			{
-				fprintf(stderr, "\nErro ao abrir o pipe 'sss%d' de interação do servidor", i);
-				close(val_fifo_fd);
-				unlink(val_fifo_fname);
-				exit(EXIT_FAILURE);
+				if (inter_pipes[i] < util)
+				{
+					util = inter_pipes[i];
+					pos = i;
+				}
 			}
+			inter_pipes[pos] += 1;
+			
+			for(i=0;i<MAXUSERS;i++) {
+				printf("\n NUMERO : %d", inter_pipes[i]); fflush(stdout);
+			}
+
+			// pipe para onde o cliente passa a falar
+			sprintf(inter_fifo_fname, INTER_FIFO, pos);
+			printf(" NOME : %s\n", inter_fifo_fname);
 		}
+
+		// copiar o nome do novo pipe para onde
+		// o cliente vai falar
+		strcpy(val.np_name, inter_fifo_fname);
+
+		// escreve a informação da validacao no npipe
+		// de validacao
+		w = write(val_fifo_fd, &val, sizeof(val));
+		// if ( w == sizeof(val))
+		// 	fprintf(stderr,"\nEnviei [%d bytes] ao user",w);
+
+		// fecha o pipe das validações
+		close(val_fifo_fd);
+		
 	}
-
-	// copiar o nome do novo pipe para onde
-	// o cliente vai falar
-	strcpy(val.np_name, inter_fifo_fname);
-	//	printf("\nfifo onde recebo o cliente: %s", val.np_name); fflush(stdout);
-	// escreve a informação da validacao no npipe
-	// de validacao
-	w = write(val_fifo_fd, &val, sizeof(val));
-	// if ( w == sizeof(val))
-	// 	fprintf(stderr,"\nEnviei [%d bytes] ao user",w);
-
-	// fecha o pipe das validações
-	close(val_fifo_fd);
-	pthread_exit(0);
-
-	return NULL;
+		pthread_exit(0);
+		return NULL;
 }
 // ------------------------------------------------------------------------------------------------------
-
-void *serv_cli(void *dados)
-{
-	int editores[MAXLINES];
-	comunica com;
-	int r, w, i, c_fifo_fd;
-	char c_fifo_fname[20];
+void serv_cli(server *s) {
+	
+	int 		editores[MAXLINES], r, w, i, c_fifo_fd;
+	comunica 	com;
+	informacao	*info;
+	char 		c_fifo_fname[20];
 
 	// inicializar o vetor com 0s
-	for (i = 0; i < MAXLINES; i++)
+	for (i = 0; i < MAXLINES; i++)  {
 		editores[i] = 0;
+		printf("%d >%d\n",i, editores[i]);
+	}
 
-	// feito de forma errada
-	char inter_fifo_fname[20];
 
-	sprintf(inter_fifo_fname, INTER_FIFO, pos);
-	//printf("inter name: %s", inter_fifo_fname);
+	pthread_t *lenp;
 
-	inter_fifo_fd = open(inter_fifo_fname, O_RDWR);
-	if (inter_fifo_fd == -1)
-	{
-		fprintf(stderr, "\n O pipe interacao nao abriu\n");
-		close(s_fifo_fd);
+	lenp = (pthread_t *) malloc(MAXUSERS * sizeof(pthread_t));
+	if(lenp == NULL) {
+		fprintf(stderr, "erro na alocacao da memoria\n");
+			exit(EXIT_FAILURE);
+	}
+
+	info = (informacao *) malloc(MAXUSERS * sizeof(informacao));
+	if(info == NULL) {
+		fprintf(stderr, "erro na alocacao da memeoria\n");
 		exit(EXIT_FAILURE);
 	}
-	else
-		// printf("\ninter fifo aberto para rd+wr\n");
-		// printf("\nSAIR? %d\n", SAIR);
 
-		while (SAIR == 0)
-		{
-			// le do pipe de interaçao
-			printf("\nestou bloqueado no read\n");
+	for(i=0;i<MAXUSERS;i++) {
+		info[i].num = i;
+		printf("Num: %d\n", i);
+		pthread_create(&lenp[i], NULL, employee, &info[i]);
+	}
 
-			r = read(inter_fifo_fd, &com.request, sizeof(com.request));
-			if (r < sizeof(com.request))
-			{
-				fprintf(stderr, "\nRecebido um request incompleto"
-								"\n[bytes lidos: %d]",
-						r);
-				continue;
-			}
+	for(i=0;i<MAXUSERS;i++)
+		pthread_join(lenp[i], NULL);
 
-			printf("\n> Numero de linha : [%d]\n", com.request.nr_linha);
+	// char inter_fifo_fname[20];
 
-			if (com.request.aspell == 0)
-			{
-				printf("\nLINHA ATUAL: %s\n", com.request.texto);
-				com.controlo.sair = SAIR;
+	// sprintf(inter_fifo_fname, INTER_FIFO, pos);
+	// //printf("inter name: %s", inter_fifo_fname);
 
-				// verifica se a linha está livre...
-				for (i = 0; i < MAXLINES; i++)
-				{
-					if (i == com.request.nr_linha)
-					{
-						if (editores[i] == com.request.pid_cliente)
-						{
-							editores[i] = 0;
-							break;
-						}
-						if (editores[i] == 0)
-						{ // linha esta livre
-							editores[i] = com.request.pid_cliente;
-							com.controlo.perm = 1;
-						}
-						else // linha nao esta livre
-							com.controlo.perm = 0;
-					}
-				}
+	// inter_fifo_fd = open(inter_fifo_fname, O_RDWR);
+	// if (inter_fifo_fd == -1) {
+	// 	fprintf(stderr, "\n O pipe interacao nao abriu\n");
+	// 	close(s_fifo_fd);
+	// 	exit(EXIT_FAILURE);
+	// }
 
-				for (i = 0; i < MAXLINES; i++)
-				{
-					printf("\tLINHA: %d", i);
-					printf("\tEDITOR:%d\n", editores[i]);
-					fflush(stdout);
-				}
-			}
-			else if (com.request.aspell == 1)
-			{
-				//Chama a função de verificação
-				dicionario(&com);
-			}
+	// 	while (!SAIR) {
+	// 		// le do pipe de interaçao
+	// 		r = read(inter_fifo_fd, &com.request, sizeof(com.request));
+	// 		if (r < sizeof(com.request)) {
+	// 			fprintf(stderr, "\nRecebido um request incompleto"
+	// 							"\n[bytes lidos: %d]",	r);
+	// 			continue;
+	// 		}
 
-			// OBTEM O NOME DO FIFO PARA ONDE VAI RESPONDER
-			sprintf(c_fifo_fname, CLIENT_FIFO, com.request.pid_cliente);
+	// 		printf("\n> Numero de linha : [%d]\n", com.request.nr_linha);
 
-			c_fifo_fd = open(c_fifo_fname, O_WRONLY);
-			if (c_fifo_fd == -1)
-				perror("\nErro no open - Ninguem quis a resposta");
-			else
-			{
-				// fprintf(stderr, "\nFIFO cliente aberto para WRITE");
+	// 		if (!com.request.aspell) {
+				
+	// 			// pthread_mutex_lock(&trinco);
 
-				w = write(c_fifo_fd, &com.controlo, sizeof(com.controlo));
-				// if( w == sizeof(com.controlo) )
-				// fprintf(stderr,"\nescreveu a resposta");
-				if (w != sizeof(com.controlo))
-					perror("\nerro a escrever a resposta");
+	// 			// printf("\nLINHA ATUAL: %s\n", com.request.texto);
+	// 			// com.controlo.sair = SAIR;
 
-				close(c_fifo_fd);
-				// fprintf(stderr,"\nFIFO cliente fechado");
-			}
+	// 			// // verifica se a linha está livre...
+				// // for (i = 0; i < MAXLINES; i++)	{
+				// // 	if (i == com.request.nr_linha)	{
+				// // 		if (editores[i] == com.request.pid_cliente)	{
+				// // 			editores[i] = 0;
+				// // 			break;
+				// // 		}
+				// // 		if (editores[i] == 0) { // linha esta livre
+				// // 			editores[i] = com.request.pid_cliente;
+				// // 			com.controlo.perm = 1;
+				// // 		}
+				// // 		else // linha nao esta livre
+				// // 			com.controlo.perm = 0;
+				// // 	}
+				// // }
+
+	// 			// pthread_mutex_unlock(&trinco);
+
+	// 			// for (i = 0; i < MAXLINES; i++)	{
+	// 			// 	printf("\tLINHA: %d", i);
+	// 			// 	fflush(stdout);
+	// 			// 	printf("\tEDITOR:%d\n", editores[i]);
+	// 			// }
+
+	// 			requisita(editores, &com);
+
+	// 		} else if(com.request.aspell == 1) {
+	// 			//Chama a função de verificação
+	// 			dicionario(&com);
+	// 		}
+
+	// 		// OBTEM O NOME DO FIFO PARA ONDE VAI RESPONDER
+	// 		sprintf(c_fifo_fname, CLIENT_FIFO, com.request.pid_cliente);
+
+	// 		c_fifo_fd = open(c_fifo_fname, O_WRONLY);
+	// 		if (c_fifo_fd == -1)
+	// 			perror("\nErro no open - Ninguem quis a resposta");
+	// 		else {
+	// 			w = write(c_fifo_fd, &com.controlo, sizeof(com.controlo));
+	// 			if (w != sizeof(com.controlo))
+	// 				perror("\nerro a escrever a resposta");
+	// 			close(c_fifo_fd);
+	// 		}
+	// 	}
+}
+// ------------------------------------------------------------------------------------------------------
+void *employee(void *dados) {
+	comunica 	com;
+	informacao 	*info = (informacao*) dados;
+	int 		c_fifo_fd, w,r, inter_fifo_fd;
+	char		c_fifo_fname[20], inter_fifo_fname[20];
+
+	sprintf(inter_fifo_fname, INTER_FIFO, info->num);
+	inter_fifo_fd = open(inter_fifo_fname, O_RDWR);
+	if (inter_fifo_fd == -1) {
+		fprintf(stderr, "\n O pipe interacao nao abriu\n");
+		exit(EXIT_FAILURE);
+	}
+	printf("Abri o np interact %s com o numero %d\n", inter_fifo_fname, inter_fifo_fd);
+
+	while(!SAIR) {
+		// le do pipe de interaçao
+		r=read(inter_fifo_fd, &com.request, sizeof(com.request));
+		if(r==sizeof(com.request))
+			printf("\nli tudo...\n");
+		else
+			fprintf(stderr,"\nnao li tudo...\n");
+
+		if(!com.request.aspell)
+			requisita(editores, &com);
+		else if(com.request.aspell == 1)
+			dicionario(&com);
+		
+		com.controlo.perm = 1;
+
+		// obtem o nome do cliente
+		sprintf(c_fifo_fname, CLIENT_FIFO, com.request.pid_cliente);
+
+		c_fifo_fd = open(c_fifo_fname, O_WRONLY);
+		if (c_fifo_fd == -1)
+			perror("\nErro no open - Ninguem quis a resposta");
+		else {
+			w = write(c_fifo_fd, &com.controlo, sizeof(com.controlo));
+			if (w != sizeof(com.controlo))
+				perror("\nerro a escrever a resposta");
+
+			close(c_fifo_fd);
 		}
+	}
+
 	pthread_exit(0);
-	return NULL;
+}
+// ------------------------------------------------------------------------------------------------------
+void requisita(int *editores, comunica *com) {
+
+	int	i;
+
+	pthread_mutex_lock(&trinco);
+	printf("\nLINHA ATUAL: %s\n", com->request.texto);
+	com->controlo.sair = SAIR;
+
+	// verifica se a linha está livre...
+	for (i = 0; i < MAXLINES; i++)	{
+		if (i == com->request.nr_linha)	{
+			// a linha já era minha e eu nao a quero +
+			if (editores[i] == com->request.pid_cliente) {
+				editores[i] = 0;
+				break;
+			}
+			if (editores[i] == 0) { // linha esta livre
+				editores[i] = com->request.pid_cliente;
+				com->controlo.perm = 1;
+			} else // linha nao esta livre
+				com->controlo.perm = 0;
+		}
+	}
+	pthread_mutex_unlock(&trinco);
+
+	for (i = 0; i < MAXLINES; i++)	{
+		printf("\tLINHA: %d", i);
+		fflush(stdout);
+		printf("\tEDITOR:%d\n", editores[i]);
+	}
+
 }
 // ------------------------------------------------------------------------------------------------------
 void banner()
@@ -503,7 +589,7 @@ void banner()
 	printf("`8888Y' Y88888P 88   YD    YP    Y88888P 88   YD  \n");
 }
 // ------------------------------------------------------------------------------------------------------
-void commandline(editor *edit, server *ser)
+void commandline(editor* edit, server* ser)
 {
 
 	char comando[50];
@@ -520,7 +606,7 @@ void commandline(editor *edit, server *ser)
 
 		if (!strcmp(cmd, "settings"))
 		{
-			mostra_def(*edit, *ser);
+			mostra_def(edit, ser);
 		}
 		else if (!strcmp(cmd, "load"))
 		{ // tem argumento
@@ -571,8 +657,8 @@ void commandline(editor *edit, server *ser)
 
 void dicionario(comunica *original)
 {
-	int ida[2], volta[2], r, i, conta_enter = 0;
-	char total[400], frase[MAXCOLUMNS + 1], *aux, pos1;
+	int ida[2], volta[2], r, i;
+	char total[400], frase[MAXCOLUMNS], *aux;
 	pid_t processo;
 
 	if (pipe(ida) < 0)
@@ -608,11 +694,10 @@ void dicionario(comunica *original)
 		close(volta[0]);
 
 		//fprintf(stderr, "\nFILHO DO DICIONARIO!!!\n");
-
+		
 		//executa o aspell
 		execlp("aspell", "aspell", "-a", "-l", "pt_PT", NULL);
-
-		exit(EXIT_SUCCESS);
+		//fprintf(stderr, "Executei o aspell!!!");
 	}
 
 	else if (processo < 0)
@@ -623,78 +708,76 @@ void dicionario(comunica *original)
 	else
 	{ // se for pai
 		//fprintf(stderr, "\nPAI DO DICIONARIO!!!\n");
-		r = read(volta[0], &total, sizeof(char) * 400);
+		r = read(volta[0], &total, sizeof(total));
+		//fprintf(stderr, "\nFilhos é só dor de cabeça...\n");
 
 		if (r >= 0)
 		{
-			total[r] = '\0';
-			fprintf(stderr, "Mensagem inicial do aspell: '%s'", total);
+			total[r] = 0;
 		}
 		else
 		{
-			fprintf(stderr, "Erro na leitura do inicio do aspell\n");
+			printf("Erro na leitura do inicio do aspell\n");
 		}
+
+		strcpy(frase, original->request.texto);
 
 		for (i = 0; i < MAXCOLUMNS; i++)
 		{
 			original->controlo.texto_certo[i] = ' ';
 		}
+		
+		//fprintf(stderr, "\nCheguei ao ciclo!!\n");
 
-		original->controlo.texto_certo[i] = '\0';
-
-		strcpy(frase, original->request.texto);
-
-		fprintf(stderr, "\nString inicial: '%s'\n", original->request.texto);
-		i = 0;
 		//Ciclo que divide as palavras
-		aux = (char *)strtok(frase, " ");
-		frase[MAXCOLUMNS] = '\0';
-
-		while (aux != NULL)
+		for (i = 0, aux = (char *)strtok(frase, " "); aux != NULL; aux = (char *)strtok(NULL, " "))
 		{
-			strcpy(total, aux);
-			fprintf(stderr, "\nString depois do strtok: %s!!", total);
-			write(ida[1], &total, strlen(total));
-
+			fprintf(stderr, "\nString inicial: %s", aux);
+			write(ida[1], &aux, strlen(aux));
 			//Validação do enter
 			write(ida[1], "\n", sizeof(char));
 
-			r = read(volta[0], &total, sizeof(char) * 400);
+			r = read(volta[0], &total, strlen(total) - 1);
 
-			pos1 = total[0];
+			fprintf(stderr, "\nOutput do aspell: %s", total);
 
-			fprintf(stderr, "\nOutput do aspell: '%s'!!\n", total);
-
-			// Se TOTAL tive dois '\n' ENTAO recebi tudo OK!
-			//                         SENAO tenho de fazer mais READS!
-			if (r > 0)
+			if (r >= 0)
 			{
-				if (total[r - 1] == '\n' && total[r] == '\n')
+				total[r] = 0;
+				if (total[0] == '*')
 				{
-					total[r - 1] = '\0';
+					original->controlo.texto_certo[i] = '*';
+					i++;
 				}
-				else
+				else if (total[0] == '&')
 				{
-					r = read(volta[0], &total, sizeof(char) * 400);
+					original->controlo.texto_certo[i] = '&';
+					i++;
 				}
 			}
 			else
 			{
 				printf("Erro na leitura do output aspell\n");
 			}
-
-			if (pos1 == '*' || pos1 == '+')
-			{
-				original->controlo.texto_certo[i] = '*';
-				i++;
-			}
-			else
-			{
-				original->controlo.texto_certo[i] = '&';
-				i++;
-			}
-
-			aux = (char *)strtok(NULL, " ");
 		}
 	}
+}
+
+void cria_np_interacao() {
+
+		int i;
+		char inter_fifo[20];
+
+		// nr np interacao != MAXUSERS = variable global
+		// definida pelo server
+		for (i = 0; i < MAXUSERS; i++)
+		{
+			sprintf(inter_fifo, INTER_FIFO, i);
+
+			if (mkfifo(inter_fifo, 0600) == -1)
+			{
+				fprintf(stderr, "\nErro ao abrir o pipe 'sss%d' de interação do servidor", i);
+				exit(EXIT_FAILURE);
+			}
+		}
 }

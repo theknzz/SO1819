@@ -3,7 +3,6 @@
 
 int main(int argc, char **argv)
 {
-
     editor t;
     user u;
     server s;
@@ -11,7 +10,7 @@ int main(int argc, char **argv)
     
     char val_fifo_fname[20], inter_fifo_fname[20];
     valida val;
-    int val_fifo_fd, res, s_fifo_fd, r, w, inter_fifo_fd;
+    int val_fifo_fd, res, s_fifo_fd, r, w;
 
     // Verificar se o NP Servidor existe
     if(access(SERVER_FIFO_P, F_OK) != 0) {
@@ -35,9 +34,9 @@ int main(int argc, char **argv)
 		perror("\nmkfifo do FIFO do validacao deu erro");
 		exit(EXIT_FAILURE);
 	}
-	fprintf(stderr, "\nFIFO validacao criado\n");
-
+	//fprintf(stderr, "\nFIFO validacao criado\n");
     // abre o pipe de validcao
+
     val_fifo_fd = open(val_fifo_fname, O_RDWR);
     if(val_fifo_fd == -1)
     {
@@ -48,9 +47,9 @@ int main(int argc, char **argv)
 
     getOption_cli(argc, argv, &u);
     
-    if(strlen(u.nome) == 0)
+    if(strlen(argv[1])==0)
     {
-        // preenche o nome do user 
+        // preenche o nome do user
     	printf("\nInsira o nome de utilizador: ");
 	    scanf(" %9[^\n]", val.nome);
     }
@@ -83,6 +82,8 @@ int main(int argc, char **argv)
     {
         t.tab[t.nlinhas][t.ncolunas];
         strcpy(inter_fifo_fname, val.np_name);
+        printf("NOME: %s", inter_fifo_fname);
+        scanf("%d", &w);
         inicia_vars(&t, &u, &s);
         strcpy(u.nome, val.nome);
         criar_editor(janela, &t, t.tab, inter_fifo_fname);

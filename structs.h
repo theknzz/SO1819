@@ -29,6 +29,7 @@
 // vars
 int SAIR;
 
+
 typedef struct Server {
     int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
     char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
@@ -60,13 +61,13 @@ typedef struct Valida {
 struct Request {
     pid_t pid_cliente;
     int nr_linha, aspell;
-    char texto[MAXCOLUMNS + 1];
+    char texto[MAXCOLUMNS];
 };
 
 struct Controlo {
     int perm; // permissao para editar linha
     int sair; // servidor vai fechar?
-    char texto_certo[MAXCOLUMNS + 1];
+    char texto_certo[MAXCOLUMNS];
 };
 
 typedef struct Comunica {
@@ -74,4 +75,8 @@ typedef struct Comunica {
     struct Controlo controlo;
 } comunica;
 
+typedef struct Informacao {
+    int num;
+    //int editores[MAXLINES];
+} informacao;
 #endif
