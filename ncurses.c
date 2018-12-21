@@ -342,7 +342,7 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
                         }
 
                         echo();
-                        for (i = t->ncolunas - 1; i >= t->c_atual; i--)
+                        for (i = t->ncolunas - 1; i >= t->c_atual - 2; i--)
                         {
                             aux[i] = aux[i - 1];
                         }

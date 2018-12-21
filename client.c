@@ -83,7 +83,6 @@ int main(int argc, char **argv)
         t.tab[t.nlinhas][t.ncolunas];
         strcpy(inter_fifo_fname, val.np_name);
         printf("NOME: %s", inter_fifo_fname);
-        scanf("%d", &w);
         inicia_vars(&t, &u, &s);
         strcpy(u.nome, val.nome);
         criar_editor(janela, &t, t.tab, inter_fifo_fname);
@@ -92,6 +91,8 @@ int main(int argc, char **argv)
         fprintf(stderr,"\n '%s' nao consta na base de dados\n", val.nome);
     else if (val.ver == 2)
         fprintf(stderr,"\nLimite maximo de clientes foi atingido.\n");
+    else if (val.ver == -1)
+        fprintf(stderr, "\nUtilizador '%s' ja se encontra logado\n", val.nome);
     else
         fprintf(stderr,"\nErro ao abrir a base de dados\n");
 

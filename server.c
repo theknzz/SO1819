@@ -7,26 +7,41 @@
 int main(int argc, char **argv) {
 
 	char 	inter_fifo_fname[20];
-	int 	i;
 	editor	t;
 	user 	u;
-	server 	s;
 	char 	str[20];
+	container box;
 	
-	// inicia variaveis
-	inicia_vars(&t, &u, &s);
+	int editores[MAXLINES], r, w, i, c_fifo_fd;
+	comunica com;
+	informacao *info;
+	char c_fifo_fname[20];
 
-	// comandos adicionais do servidor
-	getOption_ser(argc, argv, &t, &u, &s);
+	pthread_t *lenp;
+
+	lenp = (pthread_t *)malloc(MAXUSERS * sizeof(pthread_t));
+	info = (informacao *)malloc(MAXUSERS * sizeof(informacao));
+	if(lenp == NULL || info == NULL) {
+		fprintf(stderr, "erro na alocacao da memeoria\n");
+		exit(EXIT_FAILURE);
+	}
 
 	// threads
 	pthread_t tarefa[NTHR];
 	pthread_mutex_init(&trinco, NULL);
 
+	// inicia variaveis
+	inicia_vars(&t, &u, &box.server);
+
+	// comandos adicionais do servidor
+	getOption_ser(argc, argv, &t, &u, &box.server);
+
+	printf("\nBase de dados: %s.......\n", box.server.fich_nome);
+	sleep(2);
+
 	// signal
 	signal(SIGUSR1, termina1);
 
-	banner();
 
 	// verfica se já existe servidor
 	if (access(SERVER_FIFO_P, F_OK) == 0)
@@ -48,15 +63,25 @@ int main(int argc, char **argv) {
 
 	SAIR = 0;
 
-	pthread_create(&tarefa[0], NULL, verificaCliente, &s);
+	pthread_create(&tarefa[0], NULL, verificaCliente, &box);
 
-	serv_cli(&s);
+	// inicializar o vetor com 0s
+	for (i = 0; i < MAXLINES; i++)
+	{
+		editores[i] = 0;
+	}
 
-	// pthread_create(&tarefa[1], NULL, serv_cli, NULL);
+	for (i = 0; i < MAXUSERS; i++)
+	{
+		info[i].num = i;
+		printf("Num: %d\n", i);
+		pthread_create(&lenp[i], NULL, employee, &info[i]);
+	}
 
-	commandline(&t, &s);
+	commandline(&t, &box);
 
-	
+	for (i = 0; i < MAXUSERS; i++)
+		pthread_join(lenp[i], NULL);
 	pthread_join(tarefa[0], NULL);
 	// pthread_join(tarefa[1], NULL);
 	pthread_mutex_destroy(&trinco);

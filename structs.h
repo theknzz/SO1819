@@ -37,7 +37,9 @@ typedef struct Server {
 
 typedef struct User {
     char nome[9];
-    int tempo_linha, linhas_editadas, linha_atual;
+    char nome_np_inter[20];
+    float linhas_escritas;
+    int tempo_linha, linha_atual;
 } user;
 
 typedef struct Avisos {
@@ -79,4 +81,12 @@ typedef struct Informacao {
     int num;
     //int editores[MAXLINES];
 } informacao;
+
+
+typedef struct Container {
+    struct User users[MAXUSERS];
+    struct Server server;
+} container;
+
+
 #endif
