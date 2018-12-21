@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 
     getOption_cli(argc, argv, &u);
     
-    if(strlen(argv[1])==0)
+    if(argc == 1)
     {
         // preenche o nome do user
     	printf("\nInsira o nome de utilizador: ");
