@@ -28,6 +28,7 @@
 
 // vars
 int SAIR;
+char MAIN_NP[100];
 
 
 typedef struct Server {
@@ -40,6 +41,7 @@ typedef struct User {
     char nome_np_inter[20];
     float linhas_escritas;
     int tempo_linha, linha_atual;
+    pid_t user_pid;
 } user;
 
 typedef struct Avisos {

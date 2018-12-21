@@ -7,10 +7,15 @@ int main(int argc, char **argv)
     user u;
     server s;
     WINDOW *janela;
+    pthread_mutex_t trinco;
+    pthread_mutex_init(&trinco, NULL);
     
     char val_fifo_fname[20], inter_fifo_fname[20];
     valida val;
     int val_fifo_fd, res, s_fifo_fd, r, w;
+
+    // printf("\nflag: %s\n", MAIN_NP); fflush(stdout);
+    // scanf("%d", &w);
 
     // Verificar se o NP Servidor existe
     if(access(SERVER_FIFO_P, F_OK) != 0) {
@@ -59,12 +64,14 @@ int main(int argc, char **argv)
     // preenche a estrutura com o pid do user
     val.pid_user = getpid();
 
+    pthread_mutex_lock(&trinco);
     // manda a informacao ao servidor
     // para ser validada
     w = write(s_fifo_fd, &val, sizeof(val));
     if (w == sizeof(val))
         fprintf(stderr, "\nEnviei [%d bytes]...", w);
 
+    pthread_mutex_unlock(&trinco);
 
     // le a informação recebida do servidor
     // validation info

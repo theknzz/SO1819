@@ -24,8 +24,8 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
         perror("erro ao criar o np do cliente");
         exit(EXIT_FAILURE);
     }
-    else
-        printf("\npipe cliente criado\n");
+    // else
+    //     printf("\npipe cliente criado\n");
 
     initscr();     // inicializa o uso do ncurses
     start_color(); // inicia as cores
@@ -120,9 +120,9 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
             }
 
             // abre o FIFO do servidor para escrita
-            wprintw(erros, "pipe: %s", inter_fifo_fname);
-            wrefresh(erros);
-            wrefresh(janela);
+            // wprintw(erros, "pipe: %s", inter_fifo_fname);
+            // wrefresh(erros);
+            // wrefresh(janela);
             inter_fifo_fd = open(inter_fifo_fname, O_WRONLY);
             if (inter_fifo_fd == -1)
             {
@@ -291,12 +291,12 @@ void criar_editor(WINDOW *janela, editor *t, char tab[t->nlinhas][t->ncolunas], 
 
                         //envia a struct request para o server
                         w = write(inter_fifo_fd, &com.request, sizeof(com.request));
-                        if (w == sizeof(com.request))
-                        {
-                            wprintw(erros, "\nescrevi %d bytes para %d", w, inter_fifo_fd);
-                            wrefresh(erros);
-                            wrefresh(janela);
-                        }
+                        // if (w == sizeof(com.request))
+                        // {
+                        //     wprintw(erros, "\nescrevi %d bytes para %d", w, inter_fifo_fd);
+                        //     wrefresh(erros);
+                        //     wrefresh(janela);
+                        // }
 
                         c_fifo_fd = open(c_fifo_fname, O_RDWR);
                         if (c_fifo_fd == -1)
