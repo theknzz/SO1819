@@ -8,13 +8,14 @@ int main(int argc, char **argv) {
 	char 	inter_fifo_fname[20];
 	editor	t;
 	user 	u;
+	server 	s;
 	char 	str[20];
-	container box;
 	
 	int editores[MAXLINES], r, w, i, c_fifo_fd;
 	comunica com;
 	informacao *info;
 	char c_fifo_fname[20];
+	// container box;
 
 	pthread_t *lenp;
 
@@ -22,15 +23,16 @@ int main(int argc, char **argv) {
 	pthread_t tarefa;
 
 	// inicia variaveis
-	inicia_vars(&t, &u, &box.server);
+	inicia_vars(&t, &u, &s);
 
 	// comandos adicionais do servidor
-	getOption_ser(argc, argv, &t, &u, &box.server);
+	getOption_ser(argc, argv, &t, &u, &s);
 
+	users = (user *) malloc(s.n_utilizadores_max * sizeof(user));
 	trinco = (pthread_mutex_t *) malloc (NMTX * sizeof(pthread_mutex_t));
 	lenp = (pthread_t *)malloc(nr_np * sizeof(pthread_t));
 	info = (informacao *)malloc(nr_np * sizeof(informacao));
-	if(lenp == NULL || info == NULL || trinco == NULL) {
+	if(lenp == NULL || info == NULL || trinco == NULL || users == NULL) {
 		fprintf(stderr, "erro na alocacao da memoria\n");
 		exit(EXIT_FAILURE);
 	}
@@ -61,7 +63,7 @@ int main(int argc, char **argv) {
 
 	SAIR = 0;
 
-	pthread_create(&tarefa, NULL, verificaCliente, &box);
+	pthread_create(&tarefa, NULL, verificaCliente, &s);
 
 	// inicializar o vetor com 0s
 	for (i = 0; i < MAXLINES; i++)
@@ -72,11 +74,12 @@ int main(int argc, char **argv) {
 	for (i = 0; i < nr_np; i++)
 	{
 		info[i].num = i;
-		printf("Num: %d\n", i);
+		printf("Num: %d\n", info[i].num);
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
-	commandline(&t, &box, &t);
+	scanf("%d", &i);
+	commandline(&t, &s, &t);
 
 	for (i = 0; i < nr_np; i++)
 		pthread_join(lenp[i], NULL);

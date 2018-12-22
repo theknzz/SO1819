@@ -32,9 +32,8 @@ void inicia_vars(editor *t, user *u, server *s)
 
 	nr_np = MAXUSERS;
 
-	// se nao for alterado
-	strcpy(MAIN_NP, SERVER_FIFO_P);
-	strcpy(s->nome_pipe_p, MAIN_NP);
+	// se nao for alterado	
+	strcpy(s->nome_pipe_p, SERVER_FIFO_P);
 
 	// editor
 	if (getenv("MEDIT_MAXLINES") != NULL)
@@ -64,9 +63,12 @@ void inicia_vars(editor *t, user *u, server *s)
 	if (getenv("MEDIT_MAXUSERS") != NULL)
 	{
 		s->n_utilizadores_max = atoi(getenv("MEDIT_MAXUSERS"));
+		nr_max_users = s->n_utilizadores_max;
 	}
-	else
+	else {
 		s->n_utilizadores_max = MAXUSERS;
+		nr_max_users = s->n_utilizadores_max;
+	}
 	// validacao
 	if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || u->tempo_linha != TIME_OUT)
 	{
@@ -139,15 +141,15 @@ void termina1()
 }
 
 // Procura 'nome' recebido por parametro na base de dados recebida por parametro
-int verifica_user(char *nome, container *box)
+int verifica_user(char *nome, server *s)
 {
 	char 	user[20];
 	int 	i;
-	FILE *f = fopen(box->server.fich_nome, "r");
+	FILE *f = fopen(s->fich_nome, "r");
 	if (f == NULL)
 	{
 		// se a base de dados recebida nao existir ou houver algum problema na sua abertura
-		printf("\n Erro ao abrir a base de dados [%s]...n", box->server.fich_nome);
+		printf("\n Erro ao abrir a base de dados [%s]...n", s->fich_nome);
 		return -1;
 	}
 	
@@ -160,7 +162,7 @@ int verifica_user(char *nome, container *box)
 		if (strcmp(user, nome) == 0) // os nomes são comparados
 		{
 			for(i=0;i<nr_np;i++) {
-				if(strcmp(nome, box->users[i].nome)==0) {
+				if(strcmp(nome, users[i].nome)==0) {
 					printf("\nUtilizador %s ja se encontra logado!\n", nome);
 					return -1;
 				}
@@ -285,8 +287,8 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 			break;
 
 		case 'p':
-			strcpy(MAIN_NP, optarg);
-			strcpy(s->nome_pipe_p,MAIN_NP);
+			// strcpy(MAIN_NP, optarg);
+			// strcpy(s->nome_pipe_p,MAIN_NP);
 			break;
 
 		case 'n':
@@ -320,7 +322,7 @@ void *verificaCliente(void *dados)
 		inter_pipes[i] = 0;
 	}
 
-	container *box = (container *)dados;
+	server *s = (server *)dados;
 
 	int s_fifo_fd, val_fifo_fd, inter_fifo_fd, res, r, w, menor;
 	char val_fifo_fname[20], inter_fifo_fname[20], inter_fifo[20];
@@ -334,12 +336,12 @@ void *verificaCliente(void *dados)
 	}
 	//	fprintf(stderr, "\nFIFO do servidor aberto para READ (+WRITE) bloqueante\n");
 
-	for(i=0;i<nr_np;i++) {
-		strcpy(box->users[i].nome, "vazio");
-		box->users[i].user_pid = -1; // por defeito
-		strcpy(box->users[i].nome_np_inter, "nenhum");
-		box->users[i].linha_atual = -1; // por defeito
-		box->users[i].linhas_escritas = 0.0;		
+	for(i=0;i<s->n_utilizadores_max;i++) {
+		strcpy(users[i].nome, "vazio");
+		users[i].user_pid = -1; // por defeito
+		strcpy(users[i].nome_np_inter, "nenhum");
+		users[i].linha_atual = -1; // por defeito
+		users[i].linhas_escritas = 0.0;
 	}
 
 	while (1)
@@ -364,7 +366,7 @@ void *verificaCliente(void *dados)
 
 		// verifica se o username existe na base de dados
 		// verifica_user > return 1 se existir
-		val.ver = verifica_user(val.nome, box);
+		val.ver = verifica_user(val.nome, s);
 
 		if (val.ver == 1) {
 			for (i = 0; i < nr_np; i++) {
@@ -390,10 +392,10 @@ void *verificaCliente(void *dados)
 			printf("\nNOME : %s\n", inter_fifo_fname);
 
 
-			if(j<nr_np) {
-				box->users[j].user_pid = val.pid_user;
-				strcpy(box->users[j].nome, val.nome);
-				strcpy(box->users[j].nome_np_inter, inter_fifo_fname);
+			if(j<s->n_utilizadores_max) {
+				users[j].user_pid = val.pid_user;
+				strcpy(users[j].nome, val.nome);
+				strcpy(users[j].nome_np_inter, inter_fifo_fname);
 				j++;
 			}
 		}	
@@ -419,8 +421,13 @@ void *employee(void *dados)
 {
 	comunica com;
 	informacao *info = (informacao *)dados;
-	int c_fifo_fd, w, r, inter_fifo_fd, i;
+	int c_fifo_fd, w, r, inter_fifo_fd, i, num;
 	char c_fifo_fname[20], inter_fifo_fname[20];
+
+
+	// for(i=0;i<nr_np;i++)
+	// 	if(i==box->indice)
+	// 		num = box->informacao->num;
 
 	sprintf(inter_fifo_fname, INTER_FIFO, info->num);
 	inter_fifo_fd = open(inter_fifo_fname, O_RDWR);
@@ -428,7 +435,8 @@ void *employee(void *dados)
 		fprintf(stderr, "\n O pipe interacao nao abriu\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("Abri o np interact %s com o numero %d\n", inter_fifo_fname, inter_fifo_fd);
+	printf("[%d] >> Abri o np interact %s com o numero %d\n", 
+		info->num, inter_fifo_fname, inter_fifo_fd);
 
 	while (!SAIR) {
 		// le do pipe de interaçao
@@ -437,6 +445,7 @@ void *employee(void *dados)
 			printf("\nli tudo...\n");
 		else
 			fprintf(stderr, "\nnao li tudo...\n");
+
 
 		if (!com.request.aspell) {
 			pthread_mutex_lock(&trinco[0]);
@@ -466,11 +475,14 @@ void *employee(void *dados)
 // ------------------------------------------------------------------------------------------------------
 void requisita(int *editores, comunica *com)
 {
-
-	int i;
+	int i,j,n;
 
 	printf("\nLINHA ATUAL: %s\n", com->request.texto);
 	com->controlo.sair = SAIR;
+
+	for(j=0;j<nr_max_users;j++)
+		if(users[j].user_pid == com->request.pid_cliente)
+			n = j;
 
 	// verifica se a linha está livre...
 	for (i = 0; i < MAXLINES; i++)
@@ -480,11 +492,13 @@ void requisita(int *editores, comunica *com)
 			// a linha já era minha e eu nao a quero +
 			if (editores[i] == com->request.pid_cliente)
 			{
+				users[n].linha_atual = -1;
 				editores[i] = 0;
 				break;
 			}
 			if (editores[i] == 0)
 			{ // linha esta livre
+				users[n].linha_atual = com->request.nr_linha;				
 				editores[i] = com->request.pid_cliente;
 				com->controlo.perm = 1;
 			}
@@ -512,7 +526,7 @@ void banner()
 	printf("`8888Y' Y88888P 88   YD    YP    Y88888P 88   YD  \n");
 }
 // ------------------------------------------------------------------------------------------------------
-void commandline(editor *edit, container *box, editor *t) {
+void commandline(editor *edit, server *s, editor *t) {
 
 	char **tab;
 	char comando[50];
@@ -529,7 +543,7 @@ void commandline(editor *edit, container *box, editor *t) {
 
 		if (!strcmp(cmd, "settings"))
 		{
-			mostra_def(edit, &box->server);
+			mostra_def(edit, s);
 		}
 		else if (!strcmp(cmd, "load"))
 		{ // tem argumento
@@ -553,7 +567,7 @@ void commandline(editor *edit, container *box, editor *t) {
 		}
 		else if (!strcmp(cmd, "users"))
 		{
-			users_command(box->users);
+			users_command(users);
 		}
 		else if (!strcmp(cmd, "text"))
 		{

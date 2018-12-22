@@ -28,7 +28,6 @@
 
 // vars
 int SAIR;
-char MAIN_NP[100];
 
 
 typedef struct Server {
@@ -81,14 +80,14 @@ typedef struct Comunica {
 
 typedef struct Informacao {
     int num;
-    //int editores[MAXLINES];
 } informacao;
 
 
-typedef struct Container {
-    struct User users[MAXUSERS];
-    struct Server server;
-} container;
+// typedef struct Container {
+//     struct  User users[MAXUSERS];
+//     struct  Server server;
+//     int num;
+// } container;
 
 
 #endif
