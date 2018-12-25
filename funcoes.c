@@ -177,10 +177,17 @@ int verifica_user(char *nome, server *s)
 				else
 					empty = 0;
 			}
-			printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
-			fclose(f);
-			return 1;
 		}
+	}
+	if(empty == 1) {
+		printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
+		fclose(f);
+		return 1;
+	}
+	else if (empty == 0) {
+		printf("\nLimite maximo de clientes foi atingido.\n");
+		fclose(f);
+		return 2;
 	}
 
 	printf("\nUtilizador '%s' não encontrado...\n", nome); // se nao forem
@@ -402,15 +409,15 @@ void *verificaCliente(void *dados)
 			}
 			inter_pipes[pos] += 1;
 
-			for (i = 0; i < nr_np; i++)
-			{
-				printf("\n NUMERO : %d", inter_pipes[i]);
-				fflush(stdout);
-			}
+			// for (i = 0; i < nr_np; i++)
+			// {
+			// 	printf("\nNUMERO : %d", inter_pipes[i]);
+			// 	fflush(stdout);
+			// }
 
 			// pipe para onde o cliente passa a falar
 			sprintf(inter_fifo_fname, INTER_FIFO, pos);
-			printf("\nNOME : %s\n", inter_fifo_fname);
+			//printf("\nNOME : %s\n", inter_fifo_fname);
 
 
 			if(conta_user < s->n_utilizadores_max) {
@@ -555,7 +562,7 @@ void banner()
 void commandline(server *s, editor *t) {
 
 	char comando[50];
-	char cmd[20], argumento[30];
+	char cmd[20], argumento[30], c;
 	int op, num;
 	do
 	{
@@ -609,7 +616,10 @@ void commandline(server *s, editor *t) {
 		else
 			printf("O comando '%s' nao existe, execute 'help' para listar os comandos disponiveis\n", cmd);
 
-		sleep(2);
+		printf("\nPressione o ENTER para continuar...");
+		fflush(stdout);
+		read(0, &c, sizeof(char));
+		//sleep(2);
 
 	} while (strcmp(cmd, "shutdown") != 0);
 }
@@ -837,10 +847,7 @@ void users_command(user *users) {
 	diff_t = difftime(end_t, start_t);
 
 	printf("\nUtilizadores ativos:\n");
-
 	for(i = 0; i < nr_np; i++) {
-		printf("\n[%d] >> nome: %s\npid: %d\nfalo para: %s\nlinhas escritas(\%) %f\nlinha atual: %d\n",
-		i, users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
 		printf("\n[%d] >>\nidade da sessao: %f\nnome: %s\npid: %d\nfalo para: %s\nlinhas escritas(\%) %f\nlinha atual: %d\n",
 		i, diff_t,users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
 	

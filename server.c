@@ -95,11 +95,10 @@ int main(int argc, char **argv) {
 		info[i].s = &s;
 		info[i].t = &t;
 		info[i].num = i;
-		printf("Num: %d\n", info[i].num);
+		// printf("Num: %d\n", info[i].num);
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
-	//scanf("%d", &i);
 	commandline(&s, &t);
 
 	for (i = 0; i < nr_np; i++)
