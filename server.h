@@ -9,6 +9,7 @@ pthread_mutex_t *trinco;
 // vars
 int s_fifo_fd, pos, editores[MAXLINES], nr_np, nr_max_users;
 user *users;
+time_t start_t, end_t;
 
 // funcoes
 void inicia_vars(editor *t, user *u, server *s);

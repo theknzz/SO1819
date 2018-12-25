@@ -13,6 +13,7 @@
 #include <sys/wait.h>
 #include <pthread.h>
 #include <fcntl.h>
+#include <time.h>
 
 // defines
 #define MAXLINES 15

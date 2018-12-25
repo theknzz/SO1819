@@ -144,7 +144,7 @@ void termina1()
 int verifica_user(char *nome, server *s)
 {
 	char 	user[20];
-	int 	i;
+	int 	i, empty = -1;
 	FILE *f = fopen(s->fich_nome, "r");
 	if (f == NULL)
 	{
@@ -164,15 +164,26 @@ int verifica_user(char *nome, server *s)
 			for(i=0;i<nr_np;i++) {
 				if(strcmp(nome, users[i].nome)==0) {
 					printf("\nUtilizador %s ja se encontra logado!\n", nome);
+					fclose(f);
 					return -1;
 				}
+				if(strcmp(users[i].nome, "vazio") == 0)
+					empty = 1;
+				else
+					empty = 0;
 			}
-			printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
-			fclose(f);
-			return 1;
 		}
 	}
-
+	if(empty == 1) {
+		printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
+		fclose(f);
+		return 1;
+	}
+	else if (empty == 0) {
+		printf("\nLimite maximo de clientes foi atingido.\n");
+		fclose(f);
+		return 2;
+	}
 	printf("\nUtilizador '%s' não encontrado...\n", nome); // se nao forem
 	fclose(f);
 	return 0;
@@ -369,6 +380,7 @@ void *verificaCliente(void *dados)
 		val.ver = verifica_user(val.nome, s);
 
 		if (val.ver == 1) {
+			time(&start_t);
 			for (i = 0; i < nr_np; i++) {
 				if(i==0) {
 					menor = inter_pipes[0];
@@ -802,12 +814,14 @@ int carrega_tabela(int linhas, int colunas, char *tab[linhas][colunas], char *no
 // ------------------------------------------------------------------------------------------------------
 void users_command(user *users) {
 	int i = 0;
-
+	double diff_t;
+	time(&end_t);
+	diff_t = difftime(end_t, start_t);
 	printf("\nUtilizadores ativos:\n");
 
 	for(i=0; i < nr_np; i++) {
-		printf("\n[%d] >> nome: %s\npid: %d\nfalo para: %s\nlinhas escritas(\%) %f\nlinha atual: %d\n",
-			i,users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
+		printf("\n[%d] >>\nidade da sessao: %f\nnome: %s\npid: %d\nfalo para: %s\nlinhas escritas(\%) %f\nlinha atual: %d\n",
+			i,diff_t,users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
 	}
 }
 // ------------------------------------------------------------------------------------------------------

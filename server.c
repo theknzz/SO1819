@@ -78,7 +78,6 @@ int main(int argc, char **argv) {
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
-	scanf("%d", &i);
 	commandline(&t, &s, &t);
 
 	for (i = 0; i < nr_np; i++)
