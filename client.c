@@ -6,7 +6,6 @@ int main(int argc, char **argv)
     editor t;
     user u;
     server s;
-    WINDOW *janela;
     pthread_mutex_t trinco;
     pthread_mutex_init(&trinco, NULL);
     
@@ -50,6 +49,10 @@ int main(int argc, char **argv)
        exit(EXIT_FAILURE);
     }
 
+    inicia_vars(&t, &u, &s);
+    
+    char tab[t.nlinhas][t.ncolunas];
+
     getOption_cli(argc, argv, &u);
     
     if(argc == 1)
@@ -79,6 +82,10 @@ int main(int argc, char **argv)
     if( r == sizeof(val))
         fprintf(stderr,"\nli de val [%d bytes]", r);
 
+    r = read(val_fifo_fd, &tab, sizeof(char) * t.ncolunas * t.nlinhas);
+    if( r != sizeof(char) * t.ncolunas * t.nlinhas)
+        fprintf(stderr,"\nli mal a tabela\n [%d bytes]", r);
+
     //printf("\nfifo para onde falo: %s", val.np_name); fflush(stdout);
     close(val_fifo_fd);
     unlink(val_fifo_fname);
@@ -87,12 +94,10 @@ int main(int argc, char **argv)
     // se o utiizador for cliente
     if(val.ver == 1)
     {
-        t.tab[t.nlinhas][t.ncolunas];
         strcpy(inter_fifo_fname, val.np_name);
         printf("NOME: %s", inter_fifo_fname);
-        inicia_vars(&t, &u, &s);
         strcpy(u.nome, val.nome);
-        criar_editor(janela, &t, t.tab, inter_fifo_fname);
+        criar_editor(&t, tab, inter_fifo_fname);
     }
     else if (val.ver == 0)
         fprintf(stderr,"\n '%s' nao consta na base de dados\n", val.nome);

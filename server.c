@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 	server 	s;
 	char 	str[20];
 	
-	int editores[MAXLINES], r, w, i, c_fifo_fd;
+	int editores[MAXLINES], r, w, i, j, c_fifo_fd;
 	comunica com;
 	informacao *info;
 	char c_fifo_fname[20];
@@ -25,6 +25,25 @@ int main(int argc, char **argv) {
 	// inicia variaveis
 	inicia_vars(&t, &u, &s);
 
+	s.tab = (char **) malloc(sizeof(char *) * t.nlinhas);
+	if(s.tab == NULL){
+		fprintf(stderr, "\nERRO AO ALOCAR MEMORIA PARA A TABELA!\n");
+		exit(EXIT_FAILURE);
+	}
+	for(i = 0; i < t.nlinhas; i++){
+		s.tab[i] = (char *) malloc (sizeof(char) * t.ncolunas);
+		if(s.tab[i] == NULL){
+			fprintf(stderr, "\nERRO AO ALOCAR MEMORIA PARA A TABELA!\n");
+			exit(EXIT_FAILURE);
+		}
+		for(j = 0; j < t.ncolunas; j++){
+			s.tab[i][j] = ' ';
+		}
+	}
+
+	s.linhas = t.nlinhas;
+	s.colunas = t.ncolunas;
+
 	// comandos adicionais do servidor
 	getOption_ser(argc, argv, &t, &u, &s);
 
@@ -37,7 +56,7 @@ int main(int argc, char **argv) {
 		exit(EXIT_FAILURE);
 	}
 
-	for(i=0; i < NMTX; i++)
+	for(i = 0; i < NMTX; i++)
 		pthread_mutex_init(&trinco[i], NULL);
 
 	// signal
@@ -73,19 +92,28 @@ int main(int argc, char **argv) {
 
 	for (i = 0; i < nr_np; i++)
 	{
+		info[i].s = &s;
+		info[i].t = &t;
 		info[i].num = i;
 		printf("Num: %d\n", info[i].num);
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
-	commandline(&t, &s, &t);
+	//scanf("%d", &i);
+	commandline(&s, &t);
 
 	for (i = 0; i < nr_np; i++)
 		pthread_join(lenp[i], NULL);
+
 	pthread_join(tarefa, NULL);
 
 	for(i=0;i<NMTX;i++)
 		pthread_mutex_destroy(&trinco[i]);
 
+	for(i = 0; i < t.nlinhas; i++){
+		free(s.tab[i]);
+	}
+	
+	free(s.tab);
 	exit(EXIT_SUCCESS);
 }

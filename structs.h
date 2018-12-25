@@ -8,12 +8,14 @@
 #include <unistd.h>
 #include <getopt.h>
 #include <signal.h>
+#include <curses.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/select.h>
 #include <pthread.h>
 #include <fcntl.h>
-#include <time.h>
 
 // defines
 #define MAXLINES 15
@@ -32,26 +34,25 @@ int SAIR;
 
 
 typedef struct Server {
-    int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores;
-    char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10];
+    int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores, linhas, colunas;
+    char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10], **tab;
 } server;
 
 typedef struct User {
     char nome[9];
     char nome_np_inter[20];
     float linhas_escritas;
-    int tempo_linha, linha_atual;
+    int linha_atual;
     pid_t user_pid;
 } user;
 
 typedef struct Avisos {
     int tipo;
     char aviso[50];
-} avisos;
+} aviso;
 
 typedef struct Editor {
-    int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras;
-    char tab[MAXLINES][MAXCOLUMNS];
+    int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras, tempo_max_linha;
 } editor;
 
 typedef struct Valida {
@@ -81,6 +82,8 @@ typedef struct Comunica {
 
 typedef struct Informacao {
     int num;
+    server *s;
+    editor *t;
 } informacao;
 
 

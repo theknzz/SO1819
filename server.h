@@ -23,10 +23,10 @@ void termina1();
 void cria_np_interacao();
 void *employee(void *dados);
 void requisita(int *editores, comunica *com);
-void commandline(editor *edit, server *s, editor *t);
+void commandline(server *s, editor *t);
 void users_command(user *users);
-int guarda_tabela(int linhas, int colunas, char *tab[linhas][colunas], char *nome_fich);
-int carrega_tabela(int linhas, int colunas, char *tab[linhas][colunas], char *nome_fich);
+int guarda_tabela(editor *t, char **tab, char *nome_fich);
+int carrega_tabela(editor *t, char **tab, char *nome_fich);
 void text_command(char *tab[], editor *t);
 void free_command(char **tab, editor *t, int num);
 
