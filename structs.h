@@ -78,12 +78,12 @@ struct Controlo {
 typedef struct Comunica {
     struct Request request;
     struct Controlo controlo;
+    pid_t server_pid;
 } comunica;
 
 typedef struct Informacao {
     int num;
     server *s;
-    editor *t;
 } informacao;
 
 

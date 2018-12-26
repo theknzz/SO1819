@@ -1,5 +1,6 @@
 #include "server.h"
 #include "structs.h"
+#include <signal.h>
 
 #define NMTX 1
 
@@ -15,6 +16,7 @@ int main(int argc, char **argv) {
 	comunica com;
 	informacao *info;
 	char c_fifo_fname[20];
+	struct sigaction act;
 	// container box;
 
 	pthread_t *lenp;
@@ -59,8 +61,11 @@ int main(int argc, char **argv) {
 	for(i = 0; i < NMTX; i++)
 		pthread_mutex_init(&trinco[i], NULL);
 
-	// signal
+	// signals
 	signal(SIGUSR1, termina1);
+	act.sa_sigaction = sai_cli;
+	act.sa_flags = SA_SIGINFO;
+	sigaction(SIGTERM, &act, NULL);
 
 	// verfica se já existe servidor
 	if (access(SERVER_FIFO_P, F_OK) == 0)
@@ -93,12 +98,12 @@ int main(int argc, char **argv) {
 	for (i = 0; i < nr_np; i++)
 	{
 		info[i].s = &s;
-		info[i].t = &t;
 		info[i].num = i;
-		// printf("Num: %d\n", info[i].num);
+		printf("Num: %d\n", info[i].num);
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
+	//scanf("%d", &i);
 	commandline(&s, &t);
 
 	for (i = 0; i < nr_np; i++)
@@ -112,7 +117,7 @@ int main(int argc, char **argv) {
 	for(i = 0; i < t.nlinhas; i++){
 		free(s.tab[i]);
 	}
-	
+
 	free(s.tab);
 	exit(EXIT_SUCCESS);
 }

@@ -8,14 +8,16 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
     char x, aux[t->ncolunas + 1], c_fifo_fname[20];
     struct timeval timeout;
     fd_set escolha;
-
     int c_fifo_fd, inter_fifo_fd;
     comunica com;
+    union sigval val;
 
     signal(SIGUSR1, avisa_cli);
 
     // preenche o id do request
     com.request.pid_cliente = getpid();
+    //Atribui o PID ao valor que irá mandar com o sinal
+    val.sival_int = getpid();
     // Flag que controla a validação no aspell
     com.request.aspell = 0;
 
@@ -130,7 +132,7 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
             com.request.nr_linha = t->l_atual - 1;
 
             //envia a struct request para o server
-            write(inter_fifo_fd, &com.request, sizeof(com.request));
+            write(inter_fifo_fd, &com, sizeof(com));
 
             // abre o FIFO do cliente para escrita e leitura
             c_fifo_fd = open(c_fifo_fname, O_RDWR);
@@ -142,7 +144,7 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
                 exit(EXIT_FAILURE);
             }
             //le a resposta do servidor
-            read(c_fifo_fd, &com.controlo, sizeof(com.controlo));
+            read(c_fifo_fd, &com, sizeof(com));
 
             close(c_fifo_fd);
 
@@ -291,8 +293,8 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
                         strcpy(com.request.texto, aux);
 
                         //envia a struct request para o server
-                        w = write(inter_fifo_fd, &com.request, sizeof(com.request));
-                        // if (w == sizeof(com.request))
+                        w = write(inter_fifo_fd, &com, sizeof(com));
+                        // if (w == sizeof(com))
                         // {
                         //     wprintw(erros, "\nescrevi %d bytes para %d", w, inter_fifo_fd);
                         //     wrefresh(erros);
@@ -308,8 +310,8 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
                             exit(EXIT_FAILURE);
                         }
                         //le a resposta do servidor
-                        r = read(c_fifo_fd, &com.controlo, sizeof(com.controlo));
-                        /*if (r == sizeof(com.controlo))
+                        r = read(c_fifo_fd, &com, sizeof(com));
+                        /*if (r == sizeof(com))
                         {
                             wprintw(erros, "\nli %d bytes", r);
                             wrefresh(erros);
@@ -379,12 +381,17 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
                 // Bloqueia o aspell
                 com.request.aspell = 0;
 
-                write(inter_fifo_fd, &com.request, sizeof(com.request));
+                write(inter_fifo_fd, &com, sizeof(com));
             } // fim da permissao
             noecho();
             break;
         }
     }
+
+    /*wprintw(erros, "VOU MANDAR SINAL PARA %d", com.server_pid);
+    wrefresh(erros);
+    sleep(3);*/
+    sigqueue(com.server_pid, SIGTERM, val);
 
     close(c_fifo_fd);
     close(inter_fifo_fd);

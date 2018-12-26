@@ -20,6 +20,7 @@ void *verificaCliente(void *dados);
 void banner();
 void dicionario(char *original, char *correta);
 void termina1();
+int sai_cli(int s, siginfo_t *info, void *context);
 void cria_np_interacao();
 void *employee(void *dados);
 void requisita(int *editores, comunica *com);

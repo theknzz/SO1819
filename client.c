@@ -71,20 +71,20 @@ int main(int argc, char **argv)
     // manda a informacao ao servidor
     // para ser validada
     w = write(s_fifo_fd, &val, sizeof(val));
-    // if (w == sizeof(val))
-    //     fprintf(stderr, "\nEnviei [%d bytes]...", w);
+    if (w == sizeof(val))
+        fprintf(stderr, "\nEnviei [%d bytes]...", w);
 
     pthread_mutex_unlock(&trinco);
 
     // le a informação recebida do servidor
     // validation info
     r = read(val_fifo_fd, &val, sizeof(val));
-    // if( r == sizeof(val))
-    //     fprintf(stderr,"\nli de val [%d bytes]", r);
+    if( r == sizeof(val))
+        fprintf(stderr,"\nli de val [%d bytes]", r);
 
     r = read(val_fifo_fd, &tab, sizeof(char) * t.ncolunas * t.nlinhas);
-    // if( r != sizeof(char) * t.ncolunas * t.nlinhas)
-    //     fprintf(stderr,"\nli mal a tabela\n [%d bytes]", r);
+    if( r != sizeof(char) * t.ncolunas * t.nlinhas)
+        fprintf(stderr,"\nli mal a tabela\n [%d bytes]", r);
 
     //printf("\nfifo para onde falo: %s", val.np_name); fflush(stdout);
     close(val_fifo_fd);
