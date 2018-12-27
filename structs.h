@@ -44,6 +44,8 @@ typedef struct User {
     float linhas_escritas;
     int linha_atual;
     pid_t user_pid;
+    time_t start_t, end_t;
+    double idade; 
 } user;
 
 typedef struct Avisos {
@@ -61,6 +63,7 @@ typedef struct Valida {
     int ver;
     char nome[9];
     char np_name[20];
+    pid_t server_pid;
 } valida;
 
 struct Request {
@@ -78,7 +81,6 @@ struct Controlo {
 typedef struct Comunica {
     struct Request request;
     struct Controlo controlo;
-    pid_t server_pid;
 } comunica;
 
 typedef struct Informacao {

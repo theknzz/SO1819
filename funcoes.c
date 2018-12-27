@@ -36,48 +36,40 @@ void inicia_vars(editor *t, user *u, server *s)
 	strcpy(s->nome_pipe_p, SERVER_FIFO_P);
 
 	// editor
-	if (getenv("MEDIT_MAXLINES") != NULL)
-	{
+	if (getenv("MEDIT_MAXLINES") != NULL) {
 		t->nlinhas = atoi(getenv("MEDIT_MAXLINES"));
 	}
 	else
 	{
 		t->nlinhas = MAXLINES;
 	}
-	if (getenv("MEDIT_MAXCOLUMNS") != NULL)
-	{
+	if (getenv("MEDIT_MAXCOLUMNS") != NULL) {
 		t->ncolunas = atoi(getenv("MEDIT_MAXCOLUMNS"));
 	}
-	else
-	{
+	else {
 		t->ncolunas = MAXCOLUMNS;
 	}
 	// user
-	if (getenv("MEDIT_TIMEOUT") != NULL)
-	{
+	if (getenv("MEDIT_TIMEOUT") != NULL) {
 		t->tempo_max_linha = atoi(getenv("MEDIT_TIMEOUT"));
 	}
 	else
 		t->tempo_max_linha = TIME_OUT;
 	// server
-	if (getenv("MEDIT_MAXUSERS") != NULL)
-	{
+	if (getenv("MEDIT_MAXUSERS") != NULL) {
 		s->n_utilizadores_max = atoi(getenv("MEDIT_MAXUSERS"));
 		nr_max_users = s->n_utilizadores_max;
 	}
-	else
-	{
+	else {
 		s->n_utilizadores_max = MAXUSERS;
 		nr_max_users = s->n_utilizadores_max;
 	}
 	// validacao
-	if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || t->tempo_max_linha != TIME_OUT)
-	{
+	if ((s->n_utilizadores_max != t->nlinhas && s->n_utilizadores_max != MAXUSERS) || t->ncolunas < 0 || t->nlinhas < 0 || t->tempo_max_linha != TIME_OUT) 	{
 		printf("\nErro na inicialização das variáveis ambiente\n");
 		exit(EXIT_FAILURE);
 	}
 }
-
 // ------------------------------------------------------------------------------------------------------
 //                       .o88b. db      d888888b d88888b d8b   db d888888b d88888b
 //                      d8P  Y8 88        `88'   88'     888o  88 `~~88~~' 88'
@@ -86,7 +78,6 @@ void inicia_vars(editor *t, user *u, server *s)
 //                      Y8b  d8 88booo.   .88.   88.     88  V888    88    88.
 //                       `Y88P' Y88888P Y888888P Y88888P VP   V8P    YP    Y88888P
 // ------------------------------------------------------------------------------------------------------
-
 // Recebe opcao do utilizador
 void getOption_cli(int argc, char **argv, user *u)
 {
@@ -150,22 +141,26 @@ int sai_cli(int s, siginfo_t *info, void *context)
 {
 	int i;
 
-	for (i = 0; i < nr_np; i++)
-	{
-		if (users[i].user_pid == info->si_value.sival_int)
-			users[i].user_pid = -1;
-			break;
-	}
-
 	fprintf(stderr, "O cliente %s saiu!\n", users[i].nome);
+	for (i = 0; i < nr_max_users; i++) {
+		if (users[i].user_pid == info->si_value.sival_int){
+			strcpy(users[i].nome, "vazio");
+			users[i].user_pid = -1; // por defeito
+			strcpy(users[i].nome_np_inter, "ninguem");
+			users[i].linha_atual = -1; // por defeito
+			users[i].linhas_escritas = 0.0;
+			ordena();
+			break;
+		}
+	}
 	return 0;
 }
 
 // Procura 'nome' recebido por parametro na base de dados recebida por parametro
 int verifica_user(char *nome, server *s)
 {
-	char user[20];
-	int i, empty = -1;
+	char 	user[20];
+	int 	i, empty = -1;
 	FILE *f = fopen(s->fich_nome, "r");
 
 	if (f == NULL)
@@ -174,7 +169,7 @@ int verifica_user(char *nome, server *s)
 		printf("\n Erro ao abrir a base de dados [%s]...n", s->fich_nome);
 		return -1;
 	}
-
+	
 	while (fscanf(f, " %[^\n]", user) == 1) // enquanto for possível ler nomes
 	{
 		if (strlen(user) > 8)
@@ -183,30 +178,34 @@ int verifica_user(char *nome, server *s)
 		}
 		if (strcmp(user, nome) == 0) // os nomes são comparados
 		{
-			for (i = 0; i < nr_np; i++)
-			{
-				if (strcmp(nome, users[i].nome) == 0)
-				{
+			for(i = 0; i < nr_np; i++) {
+				if(strcmp(nome, users[i].nome) == 0) {
 					printf("\nUtilizador %s ja se encontra logado!\n", nome);
 					fclose(f);
 					return -1;
 				}
-				if (strcmp(users[i].nome, "vazio") == 0)
+				if(strcmp(users[i].nome, "vazio") == 0)
 					empty = 1;
 				else
 					empty = 0;
 			}
-			printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
-			fclose(f);
-			return 1;
 		}
+	}
+	if(empty == 1) {
+		printf("\nUtilizador '%s' encontrado !\n", nome); // se forem iguais
+		fclose(f);
+		return 1;
+	}
+	else if (empty == 0) {
+		printf("\nLimite maximo de clientes foi atingido.\n");
+		fclose(f);
+		return 2;
 	}
 
 	printf("\nUtilizador '%s' não encontrado...\n", nome); // se nao forem
 	fclose(f);
 	return 0;
 }
-
 // ------------------------------------------------------------------------------------------------------
 // Mostra defenicoes
 
@@ -376,7 +375,7 @@ void *verificaCliente(void *dados)
 	{
 		strcpy(users[i].nome, "vazio");
 		users[i].user_pid = -1; // por defeito
-		strcpy(users[i].nome_np_inter, "nenhum");
+		strcpy(users[i].nome_np_inter, "ninguem");
 		users[i].linha_atual = -1; // por defeito
 		users[i].linhas_escritas = 0.0;
 	}
@@ -412,7 +411,7 @@ void *verificaCliente(void *dados)
 
 		if (val.ver == 1)
 		{
-			time(&start_t);
+			val.server_pid = getpid();
 			for (i = 0; i < nr_np; i++)
 			{
 				if (i == 0)
@@ -428,23 +427,23 @@ void *verificaCliente(void *dados)
 			}
 			inter_pipes[pos] += 1;
 
-			for (i = 0; i < nr_np; i++)
-			{
-				printf("\n NUMERO : %d", inter_pipes[i]);
-				fflush(stdout);
-			}
+			// for (i = 0; i < nr_np; i++)
+			// {
+			// 	printf("\n NUMERO : %d", inter_pipes[i]);
+			// 	fflush(stdout);
+			// }
 
 			// pipe para onde o cliente passa a falar
 			sprintf(inter_fifo_fname, INTER_FIFO, pos);
-			printf("\nNOME : %s\n", inter_fifo_fname);
+			// printf("\nNOME : %s\n", inter_fifo_fname);
 
-			for (i = 0; i < nr_np; i++)
-			{
-				if (users[i].user_pid == -1)
-				{
+			for(i=0;i<s->n_utilizadores_max;i++) {
+				if(users[i].user_pid == -1) {
+					time(&users[i].start_t);
 					users[i].user_pid = val.pid_user;
 					strcpy(users[i].nome, val.nome);
 					strcpy(users[i].nome_np_inter, inter_fifo_fname);
+					break;
 				}
 			}
 		}
@@ -458,7 +457,7 @@ void *verificaCliente(void *dados)
 		// if ( w == sizeof(val))
 		// 	fprintf(stderr,"\nEnviei [%d bytes] ao user",w);
 
-		w = write(val_fifo_fd, &tab, sizeof(char) * s->colunas * s->linhas);
+		w = write(val_fifo_fd, &tab, sizeof(tab));
 
 		// fecha o pipe das validações
 		close(val_fifo_fd);
@@ -486,19 +485,17 @@ void *employee(void *dados)
 		fprintf(stderr, "\n O pipe interacao nao abriu\n");
 		exit(EXIT_FAILURE);
 	}
-	printf("[%d] >> Abri o np interact %s com o numero %d\n",
-		   info->num, inter_fifo_fname, inter_fifo_fd);
+	// printf("[%d] >> Abri o np interact %s com o numero %d\n",
+	// 	   info->num, inter_fifo_fname, inter_fifo_fd);
 
 	while (!SAIR)
 	{
 		// le do pipe de interaçao
 		r = read(inter_fifo_fd, &com, sizeof(com));
-		if (r == sizeof(com))
-			printf("\nli tudo...\n");
-		else
-			fprintf(stderr, "\nnao li tudo...\n");
-
-		com.server_pid = getpid();
+		// if (r == sizeof(com))
+		// 	printf("\nli tudo...\n");
+		// else
+		// 	fprintf(stderr, "\nnao li tudo...\n");
 
 		if (com.request.aspell == 0)
 		{
@@ -535,7 +532,8 @@ void requisita(int *editores, comunica *com)
 {
 	int i, j, n;
 
-	printf("\nLINHA ATUAL: %s\n", com->request.texto);
+	// printf("\nLINHA ATUAL: %s\n", com->request.texto);
+	putchar('\n');
 	com->controlo.sair = SAIR;
 
 	for (j = 0; j < nr_max_users; j++)
@@ -588,7 +586,8 @@ void commandline(server *s, editor *t)
 {
 
 	char comando[50];
-	char cmd[20], argumento[30];
+	memset(comando, '\n', sizeof(comando));
+	char cmd[20], argumento[30], c;
 	int op, num;
 	do
 	{
@@ -642,7 +641,9 @@ void commandline(server *s, editor *t)
 		else
 			printf("O comando '%s' nao existe, execute 'help' para listar os comandos disponiveis\n", cmd);
 
-		sleep(2);
+		printf("\nPressione o ENTER para continuar...");
+		fflush(stdout);
+		read(0, &c, sizeof(char));
 
 	} while (strcmp(cmd, "shutdown") != 0);
 }
@@ -864,24 +865,51 @@ int carrega_tabela(editor *t, char **tab, char *nome_fich)
 		}
 		read(f, &c, sizeof(char));
 	}
-
 	close(f);
 	return 0;
+}
+// ------------------------------------------------------------------------------------------------------
+void copiaUsers(user *dest, user *orig) {
+	dest->idade = orig->idade;
+	orig->idade = 0.0;
+	strcpy(dest->nome, orig->nome);
+	strcpy(orig->nome, "vazio");
+	dest->user_pid = orig->user_pid;
+	orig->user_pid = -1;
+	strcpy(dest->nome_np_inter, orig->nome_np_inter);
+	strcpy(orig->nome_np_inter, "ninguem");
+	dest->linhas_escritas = orig->linhas_escritas;
+	orig->linhas_escritas = 0.0;
+	dest->linha_atual = orig->linha_atual;
+	orig->linha_atual = -1;
+}
+// ------------------------------------------------------------------------------------------------------
+void ordena() {
+	int i, j;
+	for(i=0;i<nr_max_users;i++) {
+		if(users[i].user_pid == -1) // vazio
+			for(j=i+1;j<nr_max_users;j++)
+				if(users[j].user_pid != -1) {
+					printf("estou a copiar as coisas de %d para %d...\n", j , i);
+					copiaUsers(&users[i], &users[j]);
+					break;
+				}
+	}
 }
 // ------------------------------------------------------------------------------------------------------
 void users_command(user *users)
 {
 	int i = 0;
-	double diff_t;
-	time(&end_t);
-	diff_t = difftime(end_t, start_t);
-
 	printf("\nUtilizadores ativos:\n");
-
-	for (i = 0; i < nr_np; i++)
-	{
+	for(i = 0; i < nr_max_users; i++) {
+		time(&users[i].end_t);
+		users[i].idade = difftime(users[i].end_t, users[i].start_t);
+		if(!strcmp(users[i].nome, "vazio"))
+			users[i].idade = 0.0;
+	}
+	for(i=0;i<nr_max_users;i++) {
 		printf("\n[%d] >>\nidade da sessao: %f\nnome: %s\npid: %d\nfalo para: %s\nlinhas escritas(\%) %f\nlinha atual: %d\n",
-			   i, diff_t, users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
+		i, users[i].idade,users[i].nome, users[i].user_pid, users[i].nome_np_inter, users[i].linhas_escritas, users[i].linha_atual);
 	}
 }
 // ------------------------------------------------------------------------------------------------------

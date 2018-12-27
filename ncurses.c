@@ -1,7 +1,7 @@
 #include "structs.h"
 #include "client.h"
 
-void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_fname[20])
+void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_fname[20], valida valida)
 {
     WINDOW *erros;
     int tecla, i = 0, j, coluna_ini = 2, tecla2, w, r, selecao;
@@ -388,10 +388,11 @@ void criar_editor(editor *t, char tab[t->nlinhas][t->ncolunas], char inter_fifo_
         }
     }
 
-    /*wprintw(erros, "VOU MANDAR SINAL PARA %d", com.server_pid);
-    wrefresh(erros);
-    sleep(3);*/
-    sigqueue(com.server_pid, SIGTERM, val);
+    // wprintw(erros, "VOU MANDAR SINAL PARA %d", valida.server_pid);
+    // wrefresh(erros);
+    // sleep(3);
+
+    sigqueue(valida.server_pid, SIGTERM, val);
 
     close(c_fifo_fd);
     close(inter_fifo_fd);

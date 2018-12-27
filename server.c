@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
 	{
 		info[i].s = &s;
 		info[i].num = i;
-		printf("Num: %d\n", info[i].num);
+//		printf("Num: %d\n", info[i].num);
 		pthread_create(&lenp[i], NULL, employee, &info[i]);
 	}
 
