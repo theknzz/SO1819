@@ -41,7 +41,7 @@ typedef struct Server {
 typedef struct User {
     char nome[9];
     char nome_np_inter[20];
-    float linhas_escritas;
+    float linhas_escritas, nr_linhas;
     int linha_atual;
     pid_t user_pid;
     time_t start_t, end_t;
@@ -58,6 +58,7 @@ typedef struct Editor {
 } editor;
 
 typedef struct Valida {
+    //char file[10];
     pid_t pid_user;
     int ver;
     char nome[9];

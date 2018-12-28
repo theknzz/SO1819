@@ -7,7 +7,7 @@
 pthread_mutex_t *trinco;
 
 // vars
-int s_fifo_fd, pos, editores[MAXLINES], nr_np, nr_max_users;
+int s_fifo_fd, pos, editores[MAXLINES], nr_np, nr_max_users, totalLinhas;
 user *users;
 
 // funcoes

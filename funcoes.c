@@ -378,7 +378,10 @@ void *verificaCliente(void *dados)
 		strcpy(users[i].nome_np_inter, "ninguem");
 		users[i].linha_atual = -1; // por defeito
 		users[i].linhas_escritas = 0.0;
+		users[i].nr_linhas = 0.0;
 	}
+
+	totalLinhas = 0;
 
 	while (1)
 	{
@@ -546,14 +549,16 @@ void requisita(int *editores, comunica *com)
 		if (i == com->request.nr_linha)
 		{
 			// a linha já era minha e eu nao a quero +
-			if (editores[i] == com->request.pid_cliente)
-			{
+			if (editores[i] == com->request.pid_cliente) {
 				users[n].linha_atual = -1;
 				editores[i] = 0;
 				break;
 			}
-			if (editores[i] == 0)
+			else if (editores[i] == 0)
 			{ // linha esta livre
+				totalLinhas++;
+				users[n].nr_linhas++;
+				users[n].linhas_escritas = users[n].nr_linhas / totalLinhas;
 				users[n].linha_atual = com->request.nr_linha;
 				editores[i] = com->request.pid_cliente;
 				com->controlo.perm = 1;
@@ -880,6 +885,12 @@ void copiaUsers(user *dest, user *orig) {
 	strcpy(orig->nome_np_inter, "ninguem");
 	dest->linhas_escritas = orig->linhas_escritas;
 	orig->linhas_escritas = 0.0;
+	dest->nr_linhas = orig->nr_linhas;
+	orig->nr_linhas = 0.0;
+	dest->start_t = orig->start_t;
+	orig->start_t = 0.0;
+	dest->end_t = orig->end_t;
+	orig->end_t = 0.0;
 	dest->linha_atual = orig->linha_atual;
 	orig->linha_atual = -1;
 }
