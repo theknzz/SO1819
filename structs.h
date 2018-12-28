@@ -58,7 +58,6 @@ typedef struct Editor {
 } editor;
 
 typedef struct Valida {
-    //char file[10];
     pid_t pid_user;
     int ver;
     char nome[9];
