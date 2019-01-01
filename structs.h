@@ -32,10 +32,9 @@
 // vars
 int SAIR;
 
-
 typedef struct Server {
-    int n_utilizadores, n_utilizadores_max, n_named_pipes, fich_utilizadores, linhas, colunas;
-    char fich_nome[10], chars_mais_comuns[5], nome_pipe_p[10], **tab;
+    int n_utilizadores_max, n_named_pipes, linhas, colunas;
+    char fich_nome[10], nome_pipe_p[10], **tab;
 } server;
 
 typedef struct User {
@@ -48,13 +47,8 @@ typedef struct User {
     double idade; 
 } user;
 
-typedef struct Avisos {
-    int tipo;
-    char aviso[50];
-} aviso;
-
 typedef struct Editor {
-    int nlinhas, ncolunas, l_atual, c_atual, n_palavras, n_letras, tempo_max_linha;
+    int nlinhas, ncolunas, l_atual, c_atual, tempo_max_linha;
 } editor;
 
 typedef struct Valida {
