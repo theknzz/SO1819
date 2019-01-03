@@ -222,7 +222,7 @@ void mostra_def(editor *t, server *s)
 void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 {
 
-	int c;
+	int c, num;
 
 	while (1)
 	{
@@ -275,14 +275,18 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 
 		case 'c':
 			printf("Opcao -c com o ficheiro '%s' \n", optarg);
+			carrega_tabela(t, s->tab, optarg);
 			break;
 
 		case 'g':
 			printf("Opcao -g com o ficheiro '%s' \n", optarg);
+			guarda_tabela(t, s->tab, optarg);
 			break;
 
 		case 'l':
 			printf("Opcao -l com o numero da linha'%s' \n", optarg);
+			num = atoi(optarg);
+			free_command(s->tab, t, num);
 			break;
 
 		case 'e':
@@ -291,10 +295,12 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 
 		case 'u':
 			printf("Opcao -u\n");
+			users_command(users);
 			break;
 
 		case 't':
 			printf("Opcao -t\n");
+			text_command(s->tab, t);
 			break;
 
 		case 's':
@@ -304,13 +310,13 @@ void getOption_ser(int argc, char **argv, editor *t, user *u, server *s)
 		case 'h':
 			printf("\nCOMANDOS:\n\n");
 			printf("'-d'        \tou\tdefinicoes        \tParametros de funcionamento atuais do servidor.\n");
-			printf("'-c <fich>' \tou\tcarregar <fich>   \tCarrega dentro dos parametros definidos pelo admin.\n");
-			printf("'-g <fich>' \tou\tguardar <fich>    \tGuarda o ficheiro\n");
+			printf("'-c <fich>' \tou\tcarregar <fich>   \tCarrega do ficheiro para a tabela.\n");
+			printf("'-g <fich>' \tou\tguardar <fich>    \tGuarda no ficheiro a tabela.\n");
 			printf("'-l <linha>'\tou\tlibertar <linha>  \tDescarta eventuais alteracoes entretanto introduzidas.\n");
 			printf("'-e'        \tou\testatisticas		\tMostra as estatisticas segundo a segundo.\n");
-			printf("'-u'        \tou\tutilizadores      \tMostra todos os utilizadores presentes ordenados por idade de sessao\n");
-			printf("'-t'        \tou\ttexto             \tMostar o texto\n");
-			printf("'-f'        \tou\tficheiro          \tMudar a base de dados por defeito\n");
+			printf("'-u'        \tou\tutilizadores      \tMostra todos os utilizadores presentes ordenados por idade de sessao.\n");
+			printf("'-t'        \tou\ttexto             \tMostar o texto.\n");
+			printf("'-f'        \tou\tficheiro          \tMudar a base de dados por defeito.\n");
 			printf("'-s'        \tou\tsair              \tTermina a edição em curso emediatamente.\n");
 			break;
 
